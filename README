@@ -98,5 +98,11 @@ CS6381_MW:  (Note this is a folder)
                            protoc --python_out="./" discovery.proto
 
 
-                
+                s
         
+## Flow of the code
+
+1. Publisher - REQ and PUB sockets
+a. Configure the publisher
+b. Send register requests to the discovery service
+c. After getting successful response send isReady request to the discovery service

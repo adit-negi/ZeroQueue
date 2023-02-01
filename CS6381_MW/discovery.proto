@@ -98,6 +98,11 @@ message LookupPubByTopicResp
      // TO-DO
      // decide what fields go here. It wil be a list of publishers (with their details)
     // Maybe the RegistrantInfo message can be reused.
+    MsgTypes msg_type = 1;
+    bool status = 2; // yes or no
+    repeated string pubname = 3; // info about the registrant
+    repeated string port = 4; // info about the adrr
+    repeated string addr = 5; // info about the port
 }
 
 // Finally, we are going to make a union of all these request and response messages

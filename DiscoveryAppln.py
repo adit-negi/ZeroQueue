@@ -98,13 +98,17 @@ class DiscoveryAppln():
             f'DiscoveryAppln: handle_messages - msg: {msg}')
         # Now we need to parse the message and determine what method was invoked
         # and then call the appropriate method to handle it
-
+        print("reciveing messages", msg.msg_type)
         if msg.msg_type == 1:
             self.logger.debug("DiscoveryAppln: handle_messages - register")
             return self.register(msg)
         elif msg.msg_type == 2:
             self.logger.debug("DiscoveryAppln: handle_messages - is_ready")
             return self.is_ready(msg)
+        elif msg.msg_type == 3:
+            self.logger.debug("DiscoveryAppln: handle_messages - lookup")
+            print('returning lookup response')
+            return self.lookup_response(msg)
         else:
             self.logger.error(
                 "DiscoveryAppln: handle_messages - unknown method")
@@ -120,16 +124,22 @@ class DiscoveryAppln():
             self.logger.debug("DiscoveryAppln: register - register")
             # return a response
             sender_id = msg.register_req.info.id
-            if sender_id == 'pub':
-                # send respoinse
-                register_resp = discovery_pb2.RegisterResp()  # pylint: disable=no-member
-                register_resp.status = 1
-                register_resp.reason = "Success"
-                disc_resp = discovery_pb2.DiscoveryResp()  # pylint: disable=no-member
-                disc_resp.register_resp.CopyFrom(register_resp)
-                disc_resp.msg_type = discovery_pb2.TYPE_REGISTER  # pylint: disable=no-member
-                self.curr_registered +=1
-                return disc_resp
+
+            # send respoinse
+            register_resp = discovery_pb2.RegisterResp()  # pylint: disable=no-member
+            register_resp.status = 1
+            register_resp.reason = "Success"
+            disc_resp = discovery_pb2.DiscoveryResp()  # pylint: disable=no-member
+            disc_resp.register_resp.CopyFrom(register_resp)
+            disc_resp.msg_type = discovery_pb2.TYPE_REGISTER  # pylint: disable=no-member
+            self.curr_registered +=1
+            if msg.register_req.role == 1:
+                print('recived request to register publisher')
+                print(msg.register_req.info)
+                self.publishers[sender_id] = {"address": msg.register_req.info.addr, "port": msg.register_req.info.port, "topics": msg.register_req.topiclist}
+            else:
+                print('recived request to register subscriber')
+            return disc_resp
         else:
             self.logger.error(
                 "DiscoveryAppln: register - unknown method")
@@ -146,8 +156,10 @@ class DiscoveryAppln():
             # return a response
 
             is_ready_resp = discovery_pb2.IsReadyResp() # pylint: disable=no-member
+            print("SETTING THE STATUS", self.curr_registered, self.number_of_pubsub)
             if self.curr_registered == self.number_of_pubsub:
-                is_ready_resp.status = 1
+                
+                is_ready_resp.status = True
             else:
                 is_ready_resp.status = False
             disc_resp = discovery_pb2.DiscoveryResp()  # pylint: disable=no-member
@@ -155,6 +167,48 @@ class DiscoveryAppln():
             disc_resp.msg_type = discovery_pb2.TYPE_ISREADY  # pylint: disable=no-member
             return disc_resp
         return None
+
+    def lookup_response(self, msg):
+        """Handle lookup request."""
+        print('lookup response')
+        self.logger.debug("DiscoveryAppln: lookup")
+        self.logger.debug(f'DiscoveryAppln: lookup - msg: {msg}')
+        # Now we need to parse the message and determine what method was invoked
+        # and then call the appropriate method to handle it
+        if msg.msg_type == 3:
+            self.logger.debug("DiscoveryAppln: lookup - lookup")
+            topics = msg.lookup_req.topiclist
+            print('recived lookup request for topics', topics)
+            lookup_resp = discovery_pb2.LookupPubByTopicResp()  # pylint: disable=no-member
+            pubs_array = []
+            addr, ports = [], []
+            print(self.publishers)
+            for key, val in self.publishers.items():
+                for topic in topics:
+                    if topic in val['topics']:
+                        print('found publisher for topic', topic)
+                        pubs_array.append(key)
+                        addr.append(val['address'])
+                        ports.append(str(val['port']))
+
+            print("PRINTING PUBS ARRAY")
+            print(self.curr_registered)
+            print(pubs_array)
+            print(addr)
+            print(ports)
+            lookup_resp.pubname[:] = pubs_array
+            print('this does not work')
+            lookup_resp.addr[:] = addr
+            lookup_resp.port[:] = ports
+            print('breaks here')
+            if self.number_of_pubsub != self.curr_registered:
+                lookup_resp.status = 0
+            else:
+                lookup_resp.status = 1
+            disc_resp = discovery_pb2.DiscoveryResp()  # pylint: disable=no-member
+            disc_resp.lookup_resp.CopyFrom(lookup_resp)
+            disc_resp.msg_type = discovery_pb2.TYPE_LOOKUP_PUB_BY_TOPIC  # pylint: disable=no-member
+            return disc_resp
 def main():
 
     """Main driver for the Discovery service."""
@@ -205,7 +259,7 @@ def parse_cmd_line_args():
     parser.add_argument("-c", "--config", default="config.ini",
                         help="configuration file (default: config.ini)")
 
-    parser.add_argument("-t", "--numpubsub", type=int, default=10,
+    parser.add_argument("-t", "--numpubsub", type=int, default=2,
                         help="number of subscribers and Discoverys (default: 1000)")
 
     parser.add_argument("-l", "--loglevel", type=int, default=logging.INFO, choices=[

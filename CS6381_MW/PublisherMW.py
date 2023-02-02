@@ -188,7 +188,7 @@ class PublisherMW ():
                 # this is a response to is ready request
                 timeout = self.upcall_obj.isready_response(
                     disc_resp.isready_resp)
-
+                print(timeout)
             else:  # anything else is unrecognizable by this object
                 # raise an exception here
                 raise ValueError("Unrecognized response message")

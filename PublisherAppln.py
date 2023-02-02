@@ -49,7 +49,7 @@ import time   # for sleep
 import argparse  # for argument parsing
 import configparser  # for configuration parsing
 import logging  # for logging. Use it in place of print statements.
-
+from enum import Enum  # for an enumeration we are using to describe what state we are in
 # Import our topic selector. Feel free to use alternate way to
 # get your topics of interest
 from topic_selector import TopicSelector
@@ -60,7 +60,7 @@ from CS6381_MW.PublisherMW import PublisherMW
 from CS6381_MW import discovery_pb2
 
 # import any other packages you need.
-from enum import Enum  # for an enumeration we are using to describe what state we are in
+
 
 ##################################
 #       PublisherAppln class
@@ -68,11 +68,12 @@ from enum import Enum  # for an enumeration we are using to describe what state 
 
 
 class PublisherAppln ():
-
+    """Application logic for the publisher service."""
     # these are the states through which our publisher appln object goes thru.
     # We maintain the state so we know where we are in the lifecycle and then
     # take decisions accordingly
     class State (Enum):
+        '''Enumeration of the states that we are in'''
         INITIALIZE = 0,
         CONFIGURE = 1,
         REGISTER = 2,
@@ -203,7 +204,8 @@ class PublisherAppln ():
             # we send register request to discovery service. If we are in
             # ISREADY state, then we keep checking with the discovery
             # service.
-            if (self.state == self.State.REGISTER):
+            print(self.state == self.State.DISSEMINATE)
+            if self.state == self.State.REGISTER:
                 # send a register msg to discovery service
                 self.logger.debug(
                     "PublisherAppln::invoke_operation - register with the discovery service")
@@ -216,7 +218,7 @@ class PublisherAppln ():
                 # for the next iteration of the event loop to a large num and so return a None.
                 return None
 
-            elif (self.state == self.State.ISREADY):
+            elif self.state == self.State.ISREADY:
                 # Now keep checking with the discovery service if we are ready to go
                 #
                 # Note that in the previous version of the code, we had a loop. But now instead
@@ -240,18 +242,19 @@ class PublisherAppln ():
                 # left for us as a publisher is dissemination, which we do it actively here.
                 self.logger.debug(
                     "PublisherAppln::invoke_operation - start Disseminating")
-
+                print('dissiminating now')
                 # Now disseminate topics at the rate at which we have configured ourselves.
                 ts = TopicSelector() #pylint: disable=invalid-name
                 for _ in range(self.iters):
-                    # I leave it to you whether you want to 
+                    # I leave it to you whether you want to
                     # disseminate all the topics of interest in
-                    # each iteration OR some subset of it. 
+                    # each iteration OR some subset of it.
                     # Please modify the logic accordingly.
-                    # Here, we choose to disseminate on all topics that we publish.  
+                    # Here, we choose to disseminate on all topics that we publish.
                     # Also, we don't care
                     # about their values. But in future assignments, this can change.
                     for topic in self.topiclist:
+                        print(topic)
                         # For now, we have chosen to send info in the form "topic name: topic value"
                         # In later assignments, we should be using more complex encodings using
                         # protobuf.  In fact, I am going to do this once my basic logic is working.
@@ -270,7 +273,7 @@ class PublisherAppln ():
                 # we are done. So we move to the completed state
                 self.state = self.State.COMPLETED
 
-                # return a timeout of zero so that the event loop 
+                # return a timeout of zero so that the event loop
                 # sends control back to us right away.
                 return 0
 
@@ -306,7 +309,7 @@ class PublisherAppln ():
                 self.logger.debug(
                     "PublisherAppln::register_response - registration is a success")
 
-                # set our next state to isready so that we can then 
+                # set our next state to isready so that we can then
                 # send the isready message right away
                 self.state = self.State.ISREADY
 
@@ -317,7 +320,7 @@ class PublisherAppln ():
 
             else:
                 self.logger.debug(
-                    "PublisherAppln::register_response - registration is a failure with reason %s", 
+                    "PublisherAppln::register_response - registration is a failure with reason %s",
                     reg_resp.reason)
                 raise ValueError("Publisher needs to have unique id")
 
@@ -338,6 +341,8 @@ class PublisherAppln ():
             # Notice how we get that loop effect with the sleep (10)
             # by an interaction between the event loop and these
             # upcall methods.
+            print("isready_resp.status = ", isready_resp.status)
+
             if not isready_resp.status:
                 # discovery service is not ready yet
                 self.logger.debug(
@@ -348,13 +353,14 @@ class PublisherAppln ():
             else:
                 # we got the go ahead
                 # set the state to disseminate
+                print('sate set to disseminate')
                 self.state = self.State.DISSEMINATE
 
             # return timeout of 0 so event loop calls us back in the invoke_operation
             # method, where we take action based on what state we are in.
             return 0
 
-        except Exception as e:
+        except Exception as e: #pylint: disable=invalid-name
             raise e
 
     ########################################
@@ -367,17 +373,17 @@ class PublisherAppln ():
             self.logger.info("**********************************")
             self.logger.info("PublisherAppln::dump")
             self.logger.info("------------------------------")
-            self.logger.info("     Name: {}".format(self.name))
-            self.logger.info("     Lookup: {}".format(self.lookup))
+            self.logger.info("     Name: %s", self.name)
+            self.logger.info("     Lookup: %s", self.lookup)
             self.logger.info(
-                "     Dissemination: {}".format(self.dissemination))
-            self.logger.info("     Num Topics: {}".format(self.num_topics))
-            self.logger.info("     TopicList: {}".format(self.topiclist))
-            self.logger.info("     Iterations: {}".format(self.iters))
-            self.logger.info("     Frequency: {}".format(self.frequency))
+                "     Dissemination: %s", self.dissemination)
+            self.logger.info("     Num Topics: %s", self.num_topics)
+            self.logger.info("     TopicList: %s", self.topiclist)
+            self.logger.info("     Iterations: %s", self.iters)
+            self.logger.info("     Frequency: %s", self.frequency)
             self.logger.info("**********************************")
 
-        except Exception as e:
+        except Exception as e: # pylint: disable=invalid-name
             raise e
 
 ###################################
@@ -387,8 +393,8 @@ class PublisherAppln ():
 ###################################
 
 
-def parseCmdLineArgs():
-    # instantiate a ArgumentParser object
+def parse_cmd_line_args():
+    '''instantiate a ArgumentParser object'''
     parser = argparse.ArgumentParser(description="Publisher Application")
 
     # Now specify all the optional arguments we support
@@ -404,7 +410,8 @@ def parseCmdLineArgs():
                         help="IP addr of this publisher to advertise (default: localhost)")
 
     parser.add_argument("-p", "--port", type=int, default=5577,
-                        help="Port number on which our underlying publisher ZMQ service runs, default=5577")
+                        help="Port number on which our underlying" +
+                        "publisher ZMQ service runs, default=5577")
 
     parser.add_argument("-d", "--discovery", default="localhost:5555",
                         help="IP Addr:Port combo for the discovery service, default localhost:5555")
@@ -416,13 +423,16 @@ def parseCmdLineArgs():
                         help="configuration file (default: config.ini)")
 
     parser.add_argument("-f", "--frequency", type=int, default=1,
-                        help="Rate at which topics disseminated: default once a second - use integers")
+                        help="Rate at which topics disseminated:" +
+                        "default once a second - use integers")
 
     parser.add_argument("-i", "--iters", type=int, default=1000,
                         help="number of publication iterations (default: 1000)")
 
     parser.add_argument("-l", "--loglevel", type=int, default=logging.INFO, choices=[
-                        logging.DEBUG, logging.INFO, logging.WARNING, logging.ERROR, logging.CRITICAL], help="logging level, choices 10,20,30,40,50: default 20=logging.INFO")
+                        logging.DEBUG, logging.INFO,
+                        logging.WARNING, logging.ERROR, logging.CRITICAL],
+                        help="logging level, choices 10,20,30,40,50: default 20=logging.INFO")
 
     return parser.parse_args()
 
@@ -433,6 +443,7 @@ def parseCmdLineArgs():
 #
 ###################################
 def main():
+    ''' main program '''
     try:
         # obtain a system wide logger and initialize it to debug level to begin with
         logging.info(
@@ -441,13 +452,13 @@ def main():
 
         # first parse the arguments
         logger.debug("Main: parse command line arguments")
-        args = parseCmdLineArgs()
+        args = parse_cmd_line_args()
 
         # reset the log level to as specified
-        logger.debug("Main: resetting log level to {}".format(args.loglevel))
+        logger.debug("Main: resetting log level to %s", args.loglevel)
         logger.setLevel(args.loglevel)
-        logger.debug("Main: effective log level is {}".format(
-            logger.getEffectiveLevel()))
+        logger.debug("Main: effective log level is %s",
+            logger.getEffectiveLevel())
 
         # Obtain a publisher application
         logger.debug("Main: obtain the publisher appln object")
@@ -460,9 +471,9 @@ def main():
         # now invoke the driver program
         logger.debug("Main: invoke the publisher appln driver")
         pub_app.driver()
-
-    except Exception as e:
-        logger.error("Exception caught in main - {}".format(e))
+    # pylint: disable=invalid-name
+    except Exception as e: # pylint: disable=broad-except
+        logger.error("Exception caught in main - %s", e)
         return
 
 

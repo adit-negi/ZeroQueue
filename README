@@ -98,7 +98,6 @@ CS6381_MW:  (Note this is a folder)
                            protoc --python_out="./" discovery.proto
 
 
-                s
         
 ## Flow of the code
 

@@ -116,6 +116,8 @@ class DiscoveryMW ():
 
             print(f"Decoded message: {register_msg}")
             resp_to_send = self.upcall_obj.handle_messages(register_msg)
+
+            print(resp_to_send)
             buf2send = resp_to_send.SerializeToString()
             #  Do some 'work'
             time.sleep(1)

@@ -81,6 +81,7 @@ class SubscriberMW ():
 
             # Next get the ZMQ context
             self.logger.debug("SubscriberMW::configure - obtain ZMQ context")
+            #pylint: disable=abstract-class-instantiated
             context = zmq.Context()  # returns a singleton object
 
             # get the ZMQ poller object

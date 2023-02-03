@@ -136,7 +136,8 @@ class DiscoveryAppln():
             if msg.register_req.role == 1:
                 print('recived request to register publisher')
                 print(msg.register_req.info)
-                self.publishers[sender_id] = {"address": msg.register_req.info.addr, "port": msg.register_req.info.port, "topics": msg.register_req.topiclist}
+                self.publishers[sender_id] = {"address": msg.register_req.info.addr,
+                 "port": msg.register_req.info.port, "topics": msg.register_req.topiclist}
             else:
                 print('recived request to register subscriber')
             return disc_resp
@@ -158,7 +159,6 @@ class DiscoveryAppln():
             is_ready_resp = discovery_pb2.IsReadyResp() # pylint: disable=no-member
             print("SETTING THE STATUS", self.curr_registered, self.number_of_pubsub)
             if self.curr_registered == self.number_of_pubsub:
-                
                 is_ready_resp.status = True
             else:
                 is_ready_resp.status = False

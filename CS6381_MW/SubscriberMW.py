@@ -358,7 +358,7 @@ class SubscriberMW ():
             seconds = (t2 - t1).total_seconds()
             avg_delay += seconds
             cnt += 1
-            if cnt == 10:
+            if cnt == 100:
                 print("average delay is ", avg_delay/cnt)
                 
                 with open('data.csv', 'a') as csvfile:

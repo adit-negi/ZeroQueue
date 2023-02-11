@@ -36,6 +36,9 @@
 
 
 # import the needed packages
+import csv
+from datetime import datetime
+from dateutil import parser
 import zmq  # ZMQ sockets
 
 # import serialization logic
@@ -334,6 +337,8 @@ class SubscriberMW ():
     def connect(self,ports, address, topiclist):
         ''' connect to the publisher '''
         print('connecting to publisher')
+        print(ports)
+        print(address)
         for idx, _ in enumerate(ports):
             self.logger.info("SubscriberMW::connect")
             # connect to the publisher
@@ -342,8 +347,27 @@ class SubscriberMW ():
         for topic in topiclist:
             self.sub.setsockopt_string(zmq.SUBSCRIBE, topic)
         print('connected to publisher')
+        cnt = 0
+        avg_delay =0
         while True:
-            print(self.sub.recv())
+            data = self.sub.recv().decode("utf-8")
+            print(data)
+            t1 = data.split('_')[-1]
+            t1 = parser.parse(t1)
+            t2 = datetime.now()
+            seconds = (t2 - t1).total_seconds()
+            avg_delay += seconds
+            cnt += 1
+            if cnt == 10:
+                print("average delay is ", avg_delay/cnt)
+                
+                with open('data.csv', 'a') as csvfile:
+                    spamwriter = csv.writer(csvfile, delimiter=' ',
+                                            quotechar='|', quoting=csv.QUOTE_MINIMAL)
+                    spamwriter.writerow([avg_delay/cnt])
+                cnt = 0
+                avg_delay = 0
+            print("delay is ", seconds)
 
         return
     # set upcall handle

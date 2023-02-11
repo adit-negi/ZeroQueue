@@ -209,7 +209,11 @@ class SubscriberAppln ():
 
                 self.logger.debug(
                     "SubscriberAppln::invoke_operation - check if are ready to go")
-                self.mw_obj.lookup(self.topiclist)  # send the lookup? request
+                if self.dissemination =='Direct':
+                    self.mw_obj.lookup(self.topiclist)  # send the lookup? request
+                else:
+                    # send the lookup? request with broker overrides
+                    self.mw_obj.lookup(['broker_overrides'])
 
                 # Remember that we were invoked by the event loop as part of the upcall.
                 # So we are going to return back to it for its next iteration. Because
@@ -219,13 +223,12 @@ class SubscriberAppln ():
                 return None
 
             elif self.state == self.State.LISTEN:
-                # TODO - we need to listen for messages from publishers
                 self.logger.debug(
                     "SubscriberAppln::invoke_operation - connect to publishers")
                 self.logger.info("SubscriberAppln::PUBLISHERS")
                 self.mw_obj.connect(self.ports,
                     self.addrs, self.topiclist)
-                # we are done. So we move to the completed state           
+                # we are done. So we move to the completed state
 
                 # return a timeout of zero so that the event loop
                 # sends control back to us right away.
@@ -235,7 +238,7 @@ class SubscriberAppln ():
 
                 # we are done. Time to break the event loop.
                 # So we created this special method on the
-                # middleware object to kill its event loop
+                # middleware object to kill its event loolookupp
                 self.mw_obj.disable_event_loop()
                 return None
 

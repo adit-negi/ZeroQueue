@@ -24,6 +24,8 @@
 # (4) It must do the actual dissemination activity of the topic data when instructed by the
 
 # import the needed packages
+from datetime import datetime
+import time
 import zmq  # ZMQ sockets
 
 # import serialization logic
@@ -80,7 +82,7 @@ class PublisherMW ():
             # REQ is needed because we are the client of the Discovery service
             # PUB is needed because we publish topic data
             self.logger.debug(
-                "PublisherMW::configure - obtain REQ and PUB sockets")
+                "PublisherMW::configure - obtain REQ and SUB sockets")
             self.req = context.socket(zmq.REQ)
             self.pub = context.socket(zmq.PUB)
 
@@ -356,7 +358,7 @@ class PublisherMW ():
 
             # Now use the protobuf logic to encode the info and send it.  But for now
             # we are simply sending the string to make sure dissemination is working.
-            send_str = topic + ":" + data
+            send_str = topic + ":" + data + "_" + str(datetime.now())
             self.logger.debug("PublisherMW::disseminate - %s", send_str)
 
             # send the info as bytes. See how we are providing an encoding of utf-8

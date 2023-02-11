@@ -1,4 +1,4 @@
-h1 python3 DiscoveryAppln.py -P 5 -S 4 > discovery.out 2>&1 &
+h1 python3 DiscoveryAppln.py -t 9 > discovery.out 2>&1 &
 h2 python3 PublisherAppln.py -d "10.0.0.1:5555" -a "10.0.0.2" -T 5 -n pub1 > pub1.out 2>&1 &
 h3 python3 PublisherAppln.py -d "10.0.0.1:5555" -a "10.0.0.3" -T 5 -n pub2 > pub2.out 2>&1 &
 h4 python3 PublisherAppln.py -d "10.0.0.1:5555" -a "10.0.0.4" -T 5 -n pub3 > pub3.out 2>&1 &

@@ -4,6 +4,7 @@ with open('dump.csv', newline='') as csvfile:
     spamreader = csv.reader(csvfile, delimiter=' ', quotechar='|')
     l=[]
     for row in spamreader:
-        l.append(row)
+        if row:
+            l.append(row[0])
 
-print(reduce(lambda a,b:a+b, l))
+print(l)

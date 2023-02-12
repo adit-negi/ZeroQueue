@@ -18,4 +18,8 @@ h7 python3 SubscriberAppln.py -d "10.0.0.1:5555" -T 4 -n sub1 > sub1.out 2>&1 &
 h8 python3 SubscriberAppln.py -d "10.0.0.1:5555" -T 5 -n sub2 > sub2.out 2>&1 &
 h9 python3 SubscriberAppln.py -d "10.0.0.1:5555" -T 4 -n sub3 > sub3.out 2>&1 &
 h10 python3 SubscriberAppln.py -d "10.0.0.1:5555" -T 5 -n sub4 > sub4.out 2>&1 &
+h22 python3 SubscriberAppln.py -d "10.0.0.1:5555" -T 4 -n sub22 > sub22.out 2>&1 &
+h23 python3 SubscriberAppln.py -d "10.0.0.1:5555" -T 5 -n sub23 > sub23.out 2>&1 &
+h24 python3 SubscriberAppln.py -d "10.0.0.1:5555" -T 4 -n sub24 > sub24.out 2>&1 &
+h25 python3 SubscriberAppln.py -d "10.0.0.1:5555" -T 5 -n sub25 > sub25.out 2>&1 &
 h11 python3 BrokerAppln.py -d "10.0.0.1:5555" -a "10.0.0.11"  > bro1.out 2>&1 &

@@ -102,6 +102,7 @@ class PublisherMW ():
             # For our assignments we will use TCP. The connect string is made up of
             # tcp:// followed by IP addr:port number.
             connect_str = "tcp://" + utils.get_random_disc_node()
+            print(connect_str)
             self.req.connect(connect_str)
 
             # Since we are the publisher, the best practice as suggested in ZMQ is for us to

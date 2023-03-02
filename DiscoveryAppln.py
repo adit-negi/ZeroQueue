@@ -67,7 +67,7 @@ class DiscoveryAppln():
         self.curr_registered = 0
         self.broker = None
         self.pubs_by_topic = {}
-        self.configured_pubs = 2
+        self.configured_pubs = 5
         
     # configure the application
     def configure(self, args):
@@ -407,7 +407,7 @@ def parse_cmd_line_args():
     parser.add_argument("-c", "--config", default="config.ini",
                         help="configuration file (default: config.ini)")
 
-    parser.add_argument("-t", "--numpubsub", type=int, default=4,
+    parser.add_argument("-t", "--numpubsub", type=int, default=10,
                         help="number of subscribers and Discoverys (default: 1000)")
 
     parser.add_argument("-l", "--loglevel", type=int, default=logging.INFO, choices=[

@@ -125,8 +125,10 @@ class DiscoveryMW ():
                     
                     connect_str = "tcp://" + ip + ":" + str(port)
                     self.logger.info(connect_str)
-                    curr_req.connect(connect_str)
+                    curr_req.setsockopt(zmq.RCVTIMEO, 10000)
                     curr_req.setsockopt(zmq.LINGER, 0)
+                    curr_req.connect(connect_str)
+                    
                     fingers[curr_dht_finger_table[i]["id"]] = {
                         "socket": curr_req,
                         "extra": {}
@@ -139,8 +141,10 @@ class DiscoveryMW ():
             self.logger.info(args.addr + ":" + str(args.port))
             if "tcp://"+args.addr + ":" + str(args.port) == connect_str:
                 self.is_register_sock = True
-            self.register_sock.connect(connect_str)
+            self.register_sock.setsockopt(zmq.RCVTIMEO, 10000)
             self.register_sock.setsockopt(zmq.LINGER, 0)
+            self.register_sock.connect(connect_str)
+            
             self.finger_sockets = fingers
             self.logger.info("DiscoveryMW::configure completed")
 
@@ -188,13 +192,12 @@ class DiscoveryMW ():
                     self.ready = self.upcall_obj.is_ready_flag()
                 else:
                     self.register_sock.send_string("is_ready")
-                    if self.register_sock.poll(10000, zmq.POLLIN):
-                        resp = self.register_sock.recv_string(zmq.NOBLOCK)
-                        if resp == 'OK':
-                            self.ready = True
-                    else:
-                        self.logger.info('timeout')
-                        print('didnt get response breaking out')
+                    resp = None
+                    resp = self.register_sock.recv_string(zmq.NOBLOCK)
+                    if resp == 'OK':
+                        self.ready = True
+                    if not resp:
+                        self.logger.info("request timed out")
             self.logger.info(f"Decoded message: {discovery_req_msg}")
             resp_to_send = self.upcall_obj.handle_messages(discovery_req_msg)
 
@@ -231,10 +234,10 @@ class DiscoveryMW ():
         else:
             self.logger.info("SENT MESSAGE TO REGISTER")
             self.register_sock.send_string("register")
-            if self.register_sock.poll(10000, zmq.POLLIN):
-                resp = self.register_sock.recv_string(zmq.NOBLOCK)
-                self.logger.info(resp)
-            else:
+            resp = None
+            resp = self.register_sock.recv_string(zmq.NOBLOCK)
+            self.logger.info(resp)
+            if not resp:
                 self.logger.info('timeout')
                 print('didnt get response breaking out')
     def handle_discovery_req_message(self, discovery_req_msg):
@@ -335,9 +338,9 @@ class DiscoveryMW ():
         self.logger.info('sent now waiting for response')
         # wait for response
         response = None
-        if socket.poll(10000, zmq.POLLIN):
-            response = socket.recv(zmq.NOBLOCK)
-        else:
+
+        response = socket.recv(zmq.NOBLOCK)
+        if not response:
             self.logger.info('timeout')
             print('didnt get response breaking out')
         # TODO: handle the response
@@ -449,11 +452,11 @@ class DiscoveryMW ():
             return self.ready
         self.register_sock.send_string("is_ready")
         
-        if self.register_sock.poll(10000, zmq.POLLIN):
-            resp = self.register_sock.recv_string(zmq.NOBLOCK)
-            if resp == 'OK':
-                self.ready = True
-        else:
+        resp = None
+        resp = self.register_sock.recv_string(zmq.NOBLOCK)
+        if resp == 'OK':
+            self.ready = True
+        if not resp:
             self.logger.info('timeout')
             print('didnt get response breaking out')
         return self.ready

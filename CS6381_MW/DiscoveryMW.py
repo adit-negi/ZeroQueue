@@ -186,9 +186,11 @@ class DiscoveryMW ():
                     self.ready = self.upcall_obj.is_ready_flag()
                 else:
                     self.register_sock.send_string("is_ready")
-                    resp = self.register_sock.recv_string()
-                    if resp == 'OK':
-                        self.ready = True
+                    if self.register_sock.poll(10000, zmq.POLLIN):
+                        resp = self.register_sock.recv_string(zmq.NOBLOCK)
+                        if resp == 'OK':
+                            self.ready = True
+                    
             self.logger.info(f"Decoded message: {discovery_req_msg}")
             resp_to_send = self.upcall_obj.handle_messages(discovery_req_msg)
 
@@ -225,8 +227,9 @@ class DiscoveryMW ():
         else:
             self.logger.info("SENT MESSAGE TO REGISTER")
             self.register_sock.send_string("register")
-            resp = self.register_sock.recv_string()
-            self.logger.info(resp)
+            if self.register_sock.poll(10000, zmq.POLLIN):
+                resp = self.register_sock.recv_string(zmq.NOBLOCK)
+                self.logger.info(resp)
 
     def handle_discovery_req_message(self, discovery_req_msg):
         ''' Handle the discovery request message '''
@@ -325,10 +328,12 @@ class DiscoveryMW ():
         socket.send(disc_req.SerializeToString())
         self.logger.info('sent now waiting for response')
         # wait for response
-        response = socket.recv()
+        response = None
+        if socket.poll(10000, zmq.POLLIN):
+            response = socket.recv(zmq.NOBLOCK)
         # TODO: handle the response
         # TODO: if this fails raise an exception
-        if lookup:
+        if lookup and response:
             '''deconde tthe response'''
             disc_resp = discovery_pb2.DiscoveryResp()  # pylint: disable=no-member
             disc_resp.ParseFromString(response)
@@ -434,7 +439,9 @@ class DiscoveryMW ():
         if self.ready: 
             return self.ready
         self.register_sock.send_string("is_ready")
-        resp = self.register_sock.recv_string()
-        if resp == 'OK':
-            self.ready = True
+        
+        if self.register_sock.poll(10000, zmq.POLLIN):
+            resp = self.register_sock.recv_string(zmq.NOBLOCK)
+            if resp == 'OK':
+                self.ready = True
         return self.ready

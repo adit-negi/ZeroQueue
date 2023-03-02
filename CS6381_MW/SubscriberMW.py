@@ -358,6 +358,7 @@ class SubscriberMW ():
         while True:
             data = self.sub.recv().decode("utf-8")
             print(data)
+            self.logger.info(data)
             t1 = data.split('_')[-1]
             t1 = parser.parse(t1)
             t2 = datetime.now()

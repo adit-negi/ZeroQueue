@@ -232,7 +232,9 @@ class DiscoveryMW ():
             if self.register_sock.poll(10000, zmq.POLLIN):
                 resp = self.register_sock.recv_string(zmq.NOBLOCK)
                 self.logger.info(resp)
-
+            else:
+                self.logger.info('timeout')
+                print('didnt get response breaking out')
     def handle_discovery_req_message(self, discovery_req_msg):
         ''' Handle the discovery request message '''
         topic = discovery_req_msg.disc_reg_req.topic
@@ -333,6 +335,9 @@ class DiscoveryMW ():
         response = None
         if socket.poll(10000, zmq.POLLIN):
             response = socket.recv(zmq.NOBLOCK)
+        else:
+            self.logger.info('timeout')
+            print('didnt get response breaking out')
         # TODO: handle the response
         # TODO: if this fails raise an exception
         if lookup and response:
@@ -446,4 +451,7 @@ class DiscoveryMW ():
             resp = self.register_sock.recv_string(zmq.NOBLOCK)
             if resp == 'OK':
                 self.ready = True
+        else:
+            self.logger.info('timeout')
+            print('didnt get response breaking out')
         return self.ready

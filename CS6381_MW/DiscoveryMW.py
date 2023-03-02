@@ -126,6 +126,7 @@ class DiscoveryMW ():
                     connect_str = "tcp://" + ip + ":" + str(port)
                     self.logger.info(connect_str)
                     curr_req.connect(connect_str)
+                    curr_req.setsockopt(zmq.LINGER, 0)
                     fingers[curr_dht_finger_table[i]["id"]] = {
                         "socket": curr_req,
                         "extra": {}
@@ -139,6 +140,7 @@ class DiscoveryMW ():
             if "tcp://"+args.addr + ":" + str(args.port) == connect_str:
                 self.is_register_sock = True
             self.register_sock.connect(connect_str)
+            self.register_sock.setsockopt(zmq.LINGER, 0)
             self.finger_sockets = fingers
             self.logger.info("DiscoveryMW::configure completed")
 

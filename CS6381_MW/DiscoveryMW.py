@@ -190,7 +190,9 @@ class DiscoveryMW ():
                         resp = self.register_sock.recv_string(zmq.NOBLOCK)
                         if resp == 'OK':
                             self.ready = True
-                    
+                    else:
+                        self.logger.info('timeout')
+                        print('didnt get response breaking out')
             self.logger.info(f"Decoded message: {discovery_req_msg}")
             resp_to_send = self.upcall_obj.handle_messages(discovery_req_msg)
 

@@ -16,7 +16,7 @@
 # all our middleware objects. Make sure then to import this file in those files once
 # some content is added here that is needed by others. 
 
-
+import logging  # for logging. Use it in place of print statements.
 class Chord:
     '''Chord class to implement the chord algorithm'''
     def __init__(self):
@@ -36,8 +36,12 @@ class Chord:
         #first check if successor can handle the request
         if finger_table["1"]['hash_value'] >= hash_value:
             return finger_table['1']['id']
-
+        logger = logging.getLogger("DiscoveryAppln")
         #successor is smaller than the hash value
+        logger.info('here')
+        logger.info(str(curr_hash))
+        logger.info(str(finger_table["1"]['hash_value']))
+        logger.info(str(hash_value))
         if finger_table["1"]['hash_value'] < curr_hash and hash_value > curr_hash:
             return finger_table['1']['id']
 

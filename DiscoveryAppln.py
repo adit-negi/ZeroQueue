@@ -29,14 +29,17 @@
 # then we are in a ready state and will respond with a true to is_ready method. Until then
 # it will be false.
 
-import argparse  # for argument parsing
+import argparse
+import json  # for argument parsing
 import logging  # for logging. Use it in place of print statements.
 from enum import Enum  # for an enumeration we are using to describe what state we are i
-import configparser  # for parsing the config file
+import configparser
+import time  # for parsing the config file
 # Now import our CS6381 Middleware
 from CS6381_MW.DiscoveryMW import DiscoveryMW
 # We also need the message formats to handle incoming responses.
 from CS6381_MW import discovery_pb2
+from CS6381_MW.Common import Chord
 
 
 class DiscoveryAppln():
@@ -63,6 +66,9 @@ class DiscoveryAppln():
         self.mw_obj = None
         self.curr_registered = 0
         self.broker = None
+        self.pubs_by_topic = {}
+        self.configured_pubs = 2
+        
     # configure the application
     def configure(self, args):
         """Configure the application."""
@@ -79,8 +85,12 @@ class DiscoveryAppln():
         self.logger.debug(
             "DiscoveryAppln::configure - initialize the middleware object")
         self.mw_obj = DiscoveryMW(self.logger)
+        f = open('finger_table.json', 'r')
+        dht = open('hash_generator/dht.json', 'r')
+        dht_data = json.load(dht)
+        data = json.load(f)
         # pass remainder of the args to the m/w object
-        self.mw_obj.configure(args)
+        self.mw_obj.configure(args, data, dht_data)
 
         self.logger.info("DiscoveryAppln::configure - configuration complete")
 
@@ -100,7 +110,10 @@ class DiscoveryAppln():
         # Now we need to parse the message and determine what method was invoked
         # and then call the appropriate method to handle it
         print("reciveing messages", msg.msg_type)
-        if msg.msg_type == 1:
+        # logic to check if it is the correct node to handle the message
+        # else forward the message to the correct node
+
+        if msg.msg_type == 1 or msg.msg_type == 5:
             self.logger.debug("DiscoveryAppln: handle_messages - register")
             return self.register(msg)
         elif msg.msg_type == 2:
@@ -110,6 +123,9 @@ class DiscoveryAppln():
             self.logger.debug("DiscoveryAppln: handle_messages - lookup")
             print('returning lookup response')
             return self.lookup_response(msg)
+        elif msg.msg_type == 6:
+            self.logger.info("DiscoveryAppln: handle_messages - lookup")
+            return self.discovery_lookup_response(msg)
         else:
             self.logger.error(
                 "DiscoveryAppln: handle_messages - unknown method")
@@ -133,7 +149,6 @@ class DiscoveryAppln():
             disc_resp = discovery_pb2.DiscoveryResp()  # pylint: disable=no-member
             disc_resp.register_resp.CopyFrom(register_resp)
             disc_resp.msg_type = discovery_pb2.TYPE_REGISTER  # pylint: disable=no-member
-            self.curr_registered +=1
             if msg.register_req.role == 1:
                 print('recived request to register publisher')
                 print(msg.register_req.info)
@@ -144,6 +159,14 @@ class DiscoveryAppln():
                 self.broker = msg.register_req.info.addr + ":" + str(msg.register_req.info.port)
             else:
                 print('recived request to register subscriber')
+            return disc_resp
+        elif msg.msg_type == 5:
+            register_resp = discovery_pb2.RegisterResp()  # pylint: disable=no-member
+            register_resp.status = 1
+            register_resp.reason = "Success"
+            disc_resp = discovery_pb2.DiscoveryResp()  # pylint: disable=no-member
+            disc_resp.register_resp.CopyFrom(register_resp)
+            disc_resp.msg_type = discovery_pb2.TYPE_REGISTER  # pylint: disable=no-member
             return disc_resp
         else:
             self.logger.error(
@@ -159,13 +182,15 @@ class DiscoveryAppln():
         if msg.msg_type == 2:
             self.logger.debug("DiscoveryAppln: is_ready - is_ready")
             # return a response
-
+            #check if is ready by calling the middleware
+            ready_flag = self.mw_obj.system_ready()
+            print(ready_flag)
             is_ready_resp = discovery_pb2.IsReadyResp() # pylint: disable=no-member
-            print("SETTING THE STATUS", self.curr_registered, self.number_of_pubsub)
-            if self.curr_registered >= self.number_of_pubsub:
-                is_ready_resp.status = True
-            else:
-                is_ready_resp.status = False
+
+
+            is_ready_resp.status = ready_flag
+
+
             if self.dissemination !="Direct" and self.broker is None:
                 is_ready_resp.status = False
             disc_resp = discovery_pb2.DiscoveryResp()  # pylint: disable=no-member
@@ -185,6 +210,13 @@ class DiscoveryAppln():
             self.logger.debug("DiscoveryAppln: lookup - lookup")
             topics = msg.lookup_req.topiclist
             print('recived lookup request for topics', topics)
+            if self.mw_obj.system_ready():
+                self.ready = True
+            
+            print(self.ready)
+            print(self.curr_registered)
+
+
             lookup_resp = discovery_pb2.LookupPubByTopicResp()  # pylint: disable=no-member
             pubs_array = []
             addr, ports = [], []
@@ -198,37 +230,132 @@ class DiscoveryAppln():
                     addr.append(self.broker.split(":")[0])
                     ports.append(self.broker.split(":")[1])
             else:
-                print(self.publishers)
-                for key, val in self.publishers.items():
-                    for topic in topics:
-                        if topic in val['topics']:
-                            print('found publisher for topic', topic)
-                            if key not in pubs_array:
-                                pubs_array.append(key)
-
-                                addr.append(val['address'])  #[ip1, ip2], [port1, port2]
-                                ports.append(str(val['port']))
+                # logic to find publishers by topic
+                for topic in topics:
+                    topic_hash = self.mw_obj.hash_func(topic)
+                    # for each topic hash find the finger node and forward the request
+                    print(self.pubs_by_topic)
+                        
+                    self.mw_obj.curr_node_handle_lookup(topic_hash, topic)
+                    
+                    print(topic)
+                    print("CHECKING AGAIN")
+                    #check again
+                    if topic in self.pubs_by_topic:
+                        flag = True
+                        for pub in self.pubs_by_topic[topic]:
+                            pubs_array.append(pub["name"])
+                            addr.append(pub["ip"])
+                            ports.append(pub["port"])
+                    else:
+                        flag = False
 
             pubs_array = list(set(pubs_array))
-            print("PRINTING PUBS ARRAY")
-            print(self.curr_registered)
-            print(pubs_array)
-            print(addr)
-            print(ports)
+
             lookup_resp.pubname[:] = pubs_array
 
             lookup_resp.addr[:] = addr
             lookup_resp.port[:] = ports
             print(self.curr_registered)
-            if self.number_of_pubsub > self.curr_registered or not flag:
+            if not flag:
                 lookup_resp.status = 0
             else:
                 lookup_resp.status = 1
+            if len(pubs_array)<self.configured_pubs:
+                lookup_resp.status = 0
             print(lookup_resp.status)
             disc_resp = discovery_pb2.DiscoveryResp()  # pylint: disable=no-member
             disc_resp.lookup_resp.CopyFrom(lookup_resp)
             disc_resp.msg_type = discovery_pb2.TYPE_LOOKUP_PUB_BY_TOPIC  # pylint: disable=no-member
             return disc_resp
+
+    def discovery_lookup_response(self, msg):
+        """Handle lookup request."""
+        print(msg)
+        topic = msg.disc_reg_req.topic
+        pubs_array = []
+        addr, ports = [], []
+        print(msg)
+        print(topic)
+        print("HANDLING DISCOVERY LOOKUP")
+        if topic in self.pubs_by_topic:
+            for pub in self.pubs_by_topic[topic]:
+                pubs_array.append(pub["name"])
+                addr.append(pub["ip"])
+                ports.append(pub["port"])
+            lookup_resp = discovery_pb2.LookupPubByTopicResp()  # pylint: disable=no-member
+            lookup_resp.pubname[:] = pubs_array
+
+            lookup_resp.addr[:] = addr
+            lookup_resp.port[:] = ports
+            lookup_resp.status = 1
+            disc_resp = discovery_pb2.DiscoveryResp()  # pylint: disable=no-member
+            disc_resp.lookup_resp.CopyFrom(lookup_resp)
+            disc_resp.msg_type = discovery_pb2.TYPE_LOOKUP_PUB_BY_TOPIC  # pylint: disable=no-member
+            return disc_resp
+        else:
+            print("no publishers yet --- retry", topic)
+            print(self.pubs_by_topic)
+            lookup_resp = discovery_pb2.LookupPubByTopicResp()  # pylint: disable=no-member
+            lookup_resp.pubname[:] = pubs_array
+
+            lookup_resp.addr[:] = addr
+            lookup_resp.port[:] = ports
+            lookup_resp.status = 0
+            disc_resp = discovery_pb2.DiscoveryResp()  # pylint: disable=no-member
+            disc_resp.lookup_resp.CopyFrom(lookup_resp)
+            disc_resp.msg_type = discovery_pb2.TYPE_LOOKUP_PUB_BY_TOPIC  # pylint: disable=no-member
+            return disc_resp
+
+    def handle_register_message(self, topic, topic_hash, ip, port, role):
+
+        """Handle register message from another discovery node."""
+        if role ==2 or role=="2":
+            return
+        pubname = ip + ":" + str(port)
+        if pubname in self.publishers:
+            if topic not in self.publishers[pubname]["topics"]:
+                self.publishers[pubname]["topics"].append(topic)
+        else:
+            self.publishers[pubname] = {"address": ip, "port": port, "topics": [topic]}
+
+        if topic not in self.pubs_by_topic:
+            self.pubs_by_topic[topic] = [{'name':pubname, 'ip':ip, 'port':str(port)}]
+        else:
+            if pubname not in self.pubs_by_topic[topic]:
+                self.pubs_by_topic[topic].append({'name':pubname, 'ip':ip, 'port':str(port)})
+
+    def update_register_counter(self):
+        """Update the register counter."""
+        self.curr_registered+=1
+    def is_ready_flag(self):
+        """Return the is_ready flag."""
+        print('curr_registered', self.curr_registered)
+        return self.curr_registered>=self.number_of_pubsub
+
+    def handle_lookup_message(self, hash_topic, topic):
+        """Handle lookup message from another discovery node."""
+        if topic in self.pubs_by_topic:
+            print("YES WE HAVE THE TOPIC")
+        else:
+            print("we don't have the topic")
+
+    def handle_lookup_resposne(self, msg, topic):
+        '''handle lookup response'''
+        pubs = msg.lookup_resp.pubname
+        ports = msg.lookup_resp.port
+        addr = msg.lookup_resp.addr
+        if topic not in self.pubs_by_topic:
+            self.pubs_by_topic[topic] =[]
+        for i, _ in enumerate(pubs):
+            f = False
+            for pub in self.pubs_by_topic[topic]:
+                if pub['name'] == pubs[i]:
+                    f = True
+                    break
+            if f:
+                continue
+            self.pubs_by_topic[topic].append({'name':pubs[i], 'ip':addr[i], 'port':str(ports[i])})
 
 def main():
 
@@ -280,7 +407,7 @@ def parse_cmd_line_args():
     parser.add_argument("-c", "--config", default="config.ini",
                         help="configuration file (default: config.ini)")
 
-    parser.add_argument("-t", "--numpubsub", type=int, default=2,
+    parser.add_argument("-t", "--numpubsub", type=int, default=4,
                         help="number of subscribers and Discoverys (default: 1000)")
 
     parser.add_argument("-l", "--loglevel", type=int, default=logging.INFO, choices=[
@@ -291,11 +418,15 @@ def parse_cmd_line_args():
     parser.add_argument("-a", "--addr", default="localhost",
                         help="IP addr of this Discovery to advertise (default: localhost)")
 
-    parser.add_argument("-p", "--port", type=int, default=5555,
+    parser.add_argument("-n", "--name", default="disc3",
+                        help="name of the dht node (default: disc1)")
+
+    parser.add_argument("-p", "--port", type=int, default=5557,
                         help="Port number on which our underlying" +
                         "Discovery ZMQ service runs, default=5555")
     parser.add_argument("-b", "--broker", default="localhost:8087",
                         help="IP Addr:Port combo for the broker service, default localhost:8087")
+
     return parser.parse_args()
 
 

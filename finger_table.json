@@ -1,0 +1,270 @@
+{
+    "disc4": {
+        "1": {
+            "hash_value": 26077,
+            "id": "disc1"
+        },
+        "2": {
+            "hash_value": 26077,
+            "id": "disc1"
+        },
+        "3": {
+            "hash_value": 26077,
+            "id": "disc1"
+        },
+        "4": {
+            "hash_value": 26077,
+            "id": "disc1"
+        },
+        "5": {
+            "hash_value": 26077,
+            "id": "disc1"
+        },
+        "6": {
+            "hash_value": 26077,
+            "id": "disc1"
+        },
+        "7": {
+            "hash_value": 26077,
+            "id": "disc1"
+        },
+        "8": {
+            "hash_value": 26077,
+            "id": "disc1"
+        },
+        "9": {
+            "hash_value": 26077,
+            "id": "disc1"
+        },
+        "10": {
+            "hash_value": 26077,
+            "id": "disc1"
+        },
+        "11": {
+            "hash_value": 26077,
+            "id": "disc1"
+        },
+        "12": {
+            "hash_value": 26077,
+            "id": "disc1"
+        },
+        "13": {
+            "hash_value": 26077,
+            "id": "disc1"
+        },
+        "14": {
+            "hash_value": 26077,
+            "id": "disc1"
+        },
+        "15": {
+            "hash_value": 62471,
+            "id": "disc2"
+        },
+        "16": {
+            "hash_value": 62471,
+            "id": "disc2"
+        },
+        "predecessor": 65241
+    },
+    "disc1": {
+        "1": {
+            "hash_value": 62471,
+            "id": "disc2"
+        },
+        "2": {
+            "hash_value": 62471,
+            "id": "disc2"
+        },
+        "3": {
+            "hash_value": 62471,
+            "id": "disc2"
+        },
+        "4": {
+            "hash_value": 62471,
+            "id": "disc2"
+        },
+        "5": {
+            "hash_value": 62471,
+            "id": "disc2"
+        },
+        "6": {
+            "hash_value": 62471,
+            "id": "disc2"
+        },
+        "7": {
+            "hash_value": 62471,
+            "id": "disc2"
+        },
+        "8": {
+            "hash_value": 62471,
+            "id": "disc2"
+        },
+        "9": {
+            "hash_value": 62471,
+            "id": "disc2"
+        },
+        "10": {
+            "hash_value": 62471,
+            "id": "disc2"
+        },
+        "11": {
+            "hash_value": 62471,
+            "id": "disc2"
+        },
+        "12": {
+            "hash_value": 62471,
+            "id": "disc2"
+        },
+        "13": {
+            "hash_value": 62471,
+            "id": "disc2"
+        },
+        "14": {
+            "hash_value": 62471,
+            "id": "disc2"
+        },
+        "15": {
+            "hash_value": 62471,
+            "id": "disc2"
+        },
+        "16": {
+            "hash_value": 62471,
+            "id": "disc2"
+        },
+        "predecessor": 12861
+    },
+    "disc2": {
+        "1": {
+            "hash_value": 65241,
+            "id": "disc3"
+        },
+        "2": {
+            "hash_value": 65241,
+            "id": "disc3"
+        },
+        "3": {
+            "hash_value": 65241,
+            "id": "disc3"
+        },
+        "4": {
+            "hash_value": 65241,
+            "id": "disc3"
+        },
+        "5": {
+            "hash_value": 65241,
+            "id": "disc3"
+        },
+        "6": {
+            "hash_value": 65241,
+            "id": "disc3"
+        },
+        "7": {
+            "hash_value": 65241,
+            "id": "disc3"
+        },
+        "8": {
+            "hash_value": 65241,
+            "id": "disc3"
+        },
+        "9": {
+            "hash_value": 65241,
+            "id": "disc3"
+        },
+        "10": {
+            "hash_value": 65241,
+            "id": "disc3"
+        },
+        "11": {
+            "hash_value": 65241,
+            "id": "disc3"
+        },
+        "12": {
+            "hash_value": 65241,
+            "id": "disc3"
+        },
+        "13": {
+            "hash_value": 12861,
+            "id": "disc4"
+        },
+        "14": {
+            "hash_value": 12861,
+            "id": "disc4"
+        },
+        "15": {
+            "hash_value": 26077,
+            "id": "disc1"
+        },
+        "16": {
+            "hash_value": 62471,
+            "id": "disc2"
+        },
+        "predecessor": 26077
+    },
+    "disc3": {
+        "1": {
+            "hash_value": 12861,
+            "id": "disc4"
+        },
+        "2": {
+            "hash_value": 12861,
+            "id": "disc4"
+        },
+        "3": {
+            "hash_value": 12861,
+            "id": "disc4"
+        },
+        "4": {
+            "hash_value": 12861,
+            "id": "disc4"
+        },
+        "5": {
+            "hash_value": 12861,
+            "id": "disc4"
+        },
+        "6": {
+            "hash_value": 12861,
+            "id": "disc4"
+        },
+        "7": {
+            "hash_value": 12861,
+            "id": "disc4"
+        },
+        "8": {
+            "hash_value": 12861,
+            "id": "disc4"
+        },
+        "9": {
+            "hash_value": 12861,
+            "id": "disc4"
+        },
+        "10": {
+            "hash_value": 12861,
+            "id": "disc4"
+        },
+        "11": {
+            "hash_value": 12861,
+            "id": "disc4"
+        },
+        "12": {
+            "hash_value": 12861,
+            "id": "disc4"
+        },
+        "13": {
+            "hash_value": 12861,
+            "id": "disc4"
+        },
+        "14": {
+            "hash_value": 12861,
+            "id": "disc4"
+        },
+        "15": {
+            "hash_value": 26077,
+            "id": "disc1"
+        },
+        "16": {
+            "hash_value": 62471,
+            "id": "disc2"
+        },
+        "predecessor": 62471
+    }
+}

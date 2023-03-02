@@ -1,0 +1,32 @@
+{
+    "dht": [
+        {
+            "id": "disc2",
+            "hash": 62471,
+            "IP": "localhost",
+            "port": 5555,
+            "host": "h7"
+        },
+        {
+            "id": "disc4",
+            "hash": 12861,
+            "IP": "localhost",
+            "port": 5556,
+            "host": "h9"
+        },
+        {
+            "id": "disc3",
+            "hash": 65241,
+            "IP": "localhost",
+            "port": 5557,
+            "host": "h17"
+        },
+        {
+            "id": "disc1",
+            "hash": 26077,
+            "IP": "localhost",
+            "port": 5558,
+            "host": "h19"
+        }
+    ]
+}

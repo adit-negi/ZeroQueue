@@ -30,6 +30,7 @@ import zmq  # ZMQ sockets
 
 # import serialization logic
 from CS6381_MW import discovery_pb2
+import utils
 # from CS6381_MW import topic_pb2  # you will need this eventually
 
 # import any other packages you need.
@@ -100,7 +101,7 @@ class PublisherMW ():
                 "PublisherMW::configure - connect to Discovery service")
             # For our assignments we will use TCP. The connect string is made up of
             # tcp:// followed by IP addr:port number.
-            connect_str = "tcp://" + args.discovery
+            connect_str = "tcp://" + utils.get_random_disc_node()
             self.req.connect(connect_str)
 
             # Since we are the publisher, the best practice as suggested in ZMQ is for us to

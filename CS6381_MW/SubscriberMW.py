@@ -38,11 +38,13 @@
 # import the needed packages
 import csv
 from datetime import datetime
+import time
 from dateutil import parser
 import zmq  # ZMQ sockets
 
 # import serialization logic
 from CS6381_MW import discovery_pb2
+import utils
 # from CS6381_MW import topic_pb2  # you will need this eventually
 
 # import any other packages you need.
@@ -113,7 +115,9 @@ class SubscriberMW ():
                 "SubscriberMW::configure - connect to Discovery service")
             # For our assignments we will use TCP. The connect string is made up of
             # tcp:// followed by IP addr:port number.
-            connect_str = "tcp://" + args.discovery
+            random_discovery = utils.get_random_disc_node()
+            print(random_discovery)
+            connect_str = "tcp://" + random_discovery
             self.req.connect(connect_str)
 
             self.logger.info("SubscriberMW::configure completed")
@@ -295,7 +299,9 @@ class SubscriberMW ():
 
         try:
             self.logger.info("SubscriberMW::lookup")
-
+            #give some time for system to bootstrap, immediate request will lead to 
+            # uncneccessary retries
+            time.sleep(5)
             # send lookup req
             self.logger.debug(
                 "SubscriberMW::lookup - populate the nested lookup msg")

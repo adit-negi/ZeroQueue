@@ -35,6 +35,8 @@ enum MsgTypes {
      TYPE_ISREADY = 2;    // needed by publisher to know if it can proceed
      TYPE_LOOKUP_PUB_BY_TOPIC = 3;  // needed by a subscriber
      TYPE_LOOKUP_ALL_PUBS = 4;   // probably needed by broker
+     TYPE_DISC_REG = 5;
+     TYPE_DISC_LOOKUP = 6;
      // anything more
 }
 
@@ -44,6 +46,21 @@ message RegistrantInfo {
     string id = 1;  // name of the entity
     optional string addr = 2; // IP address (only for publisher)
     optional uint32 port = 3; // port number (only for publisher)
+}
+
+message DiscoveryRegisterReq {
+   string topic = 2;
+   string ip = 3;
+   string port = 4; 
+   string hashedtopic = 5;
+   string pubname = 6;
+}
+
+message DiscoveryLookupReq {
+   string topic = 1;
+
+   string hashedtopic = 2;
+
 }
 
 // Likewise, instead of just comma separated list of topics, maybe a better way to send the topic list
@@ -115,6 +132,8 @@ message DiscoveryReq
               RegisterReq register_req = 2;
               IsReadyReq isready_req = 3;
               LookupPubByTopicReq lookup_req = 4;
+              DiscoveryRegisterReq disc_reg_req = 5;
+              DiscoveryLookupReq disc_lookup_req = 6;
               // add more 
         }
 }

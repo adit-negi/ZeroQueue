@@ -307,7 +307,7 @@ class DiscoveryMW ():
 
         chord = Chord()
         self.logger.info('chord initialized')
-        node_value = chord.chord_algo(hash_topic, self.finger_table)
+        node_value = chord.chord_algo(hash_topic, self.finger_table, self.curr_node_hash)
 
         socket = self.finger_sockets[node_value]["socket"]
 

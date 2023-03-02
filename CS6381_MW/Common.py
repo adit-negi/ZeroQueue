@@ -26,7 +26,7 @@ class Chord:
         self.data = None
 
 
-    def chord_algo(self, hash_value, finger_table):
+    def chord_algo(self, hash_value, finger_table, curr_hash):
         '''This function implements the chord algorithm'''
         # find the node which is smallr than the hash value
         print(finger_table)
@@ -36,6 +36,11 @@ class Chord:
         #first check if successor can handle the request
         if finger_table["1"]['hash_value'] >= hash_value:
             return finger_table['1']['id']
+
+        #successor is smaller than the hash value
+        if finger_table["1"]['hash_value'] < curr_hash and hash_value > curr_hash:
+            return finger_table['1']['id']
+
         #if not, find the node which is smaller than the hash value
         print('here')
         for finger in finger_table:

@@ -1,25 +1,30 @@
-h1 python3 DiscoveryAppln.py -t 9 > discovery.out 2>&1 &
-h2 python3 PublisherAppln.py -d "10.0.0.1:5555" -a "10.0.0.2" -T 5 -n pub1 > pub1.out 2>&1 &
-h3 python3 PublisherAppln.py -d "10.0.0.1:5555" -a "10.0.0.3" -T 5 -n pub2 > pub2.out 2>&1 &
-h4 python3 PublisherAppln.py -d "10.0.0.1:5555" -a "10.0.0.4" -T 5 -n pub3 > pub3.out 2>&1 &
-h5 python3 PublisherAppln.py -d "10.0.0.1:5555" -a "10.0.0.5" -T 5 -n pub4 > pub4.out 2>&1 &
-h6 python3 PublisherAppln.py -d "10.0.0.1:5555" -a "10.0.0.6" -T 5 -n pub5 > pub5.out 2>&1 &
-h12 python3 PublisherAppln.py -d "10.0.0.1:5555" -a "10.0.0.12" -T 5 -n pub6 > pub6.out 2>&1 &
-h13 python3 PublisherAppln.py -d "10.0.0.1:5555" -a "10.0.0.13" -T 5 -n pub7 > pub7.out 2>&1 &
-h14 python3 PublisherAppln.py -d "10.0.0.1:5555" -a "10.0.0.14" -T 5 -n pub8 > pub8.out 2>&1 &
-h15 python3 PublisherAppln.py -d "10.0.0.1:5555" -a "10.0.0.15" -T 5 -n pub9 > pub9.out 2>&1 &
-h16 python3 PublisherAppln.py -d "10.0.0.1:5555" -a "10.0.0.16" -T 5 -n pub10 > pub10.out 2>&1 &
-h17 python3 PublisherAppln.py -d "10.0.0.1:5555" -a "10.0.0.17" -T 5 -n pub11 > pub11.out 2>&1 &
-h18 python3 PublisherAppln.py -d "10.0.0.1:5555" -a "10.0.0.18" -T 5 -n pub12 > pub12.out 2>&1 &
-h19 python3 PublisherAppln.py -d "10.0.0.1:5555" -a "10.0.0.19" -T 5 -n pub13 > pub13.out 2>&1 &
-h20 python3 PublisherAppln.py -d "10.0.0.1:5555" -a "10.0.0.20" -T 5 -n pub14 > pub14.out 2>&1 &
-h21 python3 PublisherAppln.py -d "10.0.0.1:5555" -a "10.0.0.21" -T 5 -n pub15 > pub15.out 2>&1 &
-h7 python3 SubscriberAppln.py -d "10.0.0.1:5555" -T 4 -n sub1 > sub1.out 2>&1 &
-h8 python3 SubscriberAppln.py -d "10.0.0.1:5555" -T 5 -n sub2 > sub2.out 2>&1 &
-h9 python3 SubscriberAppln.py -d "10.0.0.1:5555" -T 4 -n sub3 > sub3.out 2>&1 &
-h10 python3 SubscriberAppln.py -d "10.0.0.1:5555" -T 5 -n sub4 > sub4.out 2>&1 &
-h22 python3 SubscriberAppln.py -d "10.0.0.1:5555" -T 4 -n sub22 > sub22.out 2>&1 &
-h23 python3 SubscriberAppln.py -d "10.0.0.1:5555" -T 5 -n sub23 > sub23.out 2>&1 &
-h24 python3 SubscriberAppln.py -d "10.0.0.1:5555" -T 4 -n sub24 > sub24.out 2>&1 &
-h25 python3 SubscriberAppln.py -d "10.0.0.1:5555" -T 5 -n sub25 > sub25.out 2>&1 &
-h11 python3 BrokerAppln.py -d "10.0.0.1:5555" -a "10.0.0.11"  > bro1.out 2>&1 &
+h1 python3 DiscoveryAppln.py -n disc5  -p 5555 > disc5.out 2>&1 &
+h1 python3 DiscoveryAppln.py -n disc14  -p 5556 > disc14.out 2>&1 &
+h2 python3 DiscoveryAppln.py -n disc11  -p 5555 > disc11.out 2>&1 &
+h4 python3 DiscoveryAppln.py -n disc13  -p 5555 > disc13.out 2>&1 &
+h5 python3 DiscoveryAppln.py -n disc19  -p 5555 > disc19.out 2>&1 &
+h6 python3 DiscoveryAppln.py -n disc2  -p 5555 > disc2.out 2>&1 &
+h8 python3 DiscoveryAppln.py -n disc9  -p 5555 > disc9.out 2>&1 &
+h8 python3 DiscoveryAppln.py -n disc16  -p 5556 > disc16.out 2>&1 &
+h9 python3 DiscoveryAppln.py -n disc4  -p 5555 > disc4.out 2>&1 &
+h10 python3 DiscoveryAppln.py -n disc8  -p 5555 > disc8.out 2>&1 &
+h10 python3 DiscoveryAppln.py -n disc15  -p 5556 > disc15.out 2>&1 &
+h10 python3 DiscoveryAppln.py -n disc18  -p 5557 > disc18.out 2>&1 &
+h13 python3 DiscoveryAppln.py -n disc20  -p 5555 > disc20.out 2>&1 &
+h14 python3 DiscoveryAppln.py -n disc1  -p 5555 > disc1.out 2>&1 &
+h14 python3 DiscoveryAppln.py -n disc3  -p 5556 > disc3.out 2>&1 &
+h14 python3 DiscoveryAppln.py -n disc17  -p 5557 > disc17.out 2>&1 &
+h15 python3 DiscoveryAppln.py -n disc10  -p 5555 > disc10.out 2>&1 &
+h19 python3 DiscoveryAppln.py -n disc6  -p 5555 > disc6.out 2>&1 &
+h19 python3 DiscoveryAppln.py -n disc7  -p 5556 > disc7.out 2>&1 &
+h19 python3 DiscoveryAppln.py -n disc12  -p 5557 > disc12.out 2>&1 &
+h12 python3 PublisherAppln.py -n pub3  -a 10.0.0.12 -T 5 > pub3.out 2>&1 &
+h13 python3 PublisherAppln.py -n pub1  -a 10.0.0.13 -T 7 > pub1.out 2>&1 &
+h13 python3 PublisherAppln.py -n pub4  -a 10.0.0.13 -T 8 > pub4.out 2>&1 &
+h14 python3 PublisherAppln.py -n pub2  -a 10.0.0.14 -T 5 > pub2.out 2>&1 &
+h15 python3 PublisherAppln.py -n pub5  -a 10.0.0.15 -T 5 > pub5.out 2>&1 &
+h8 python3 SubscriberAppln.py -n sub1  -T 7 > sub1.out 2>&1 &
+h8 python3 SubscriberAppln.py -n sub2  -T 5 > sub2.out 2>&1 &
+h10 python3 SubscriberAppln.py -n sub3  -T 9 > sub3.out 2>&1 &
+h17 python3 SubscriberAppln.py -n sub4  -T 7 > sub4.out 2>&1 &
+h17 python3 SubscriberAppln.py -n sub5  -T 7 > sub5.out 2>&1 &

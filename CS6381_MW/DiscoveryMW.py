@@ -43,7 +43,7 @@ class DiscoveryMW ():
     # constructor
     ########################################
     def __init__(self, logger):
-        self.logger = logger  # internal logger for print statements
+        self.logger = logger  # internal logger for self.logger.info statements
         self.req = None  # will be a ZMQ REQ socket to talk to Discovery service
         self.pub = None  # will be a ZMQ PUB socket for dissemination
         self.poller = None  # used to wait on incoming replies
@@ -124,17 +124,17 @@ class DiscoveryMW ():
                         curr_dht_finger_table[i]["id"])
                     
                     connect_str = "tcp://" + ip + ":" + str(port)
-                    print(connect_str)
+                    self.logger.info(connect_str)
                     curr_req.connect(connect_str)
                     fingers[curr_dht_finger_table[i]["id"]] = {
                         "socket": curr_req,
                         "extra": {}
                     }
-                    print(fingers)
+                    self.logger.info(fingers)
 
             self.register_sock = context.socket(zmq.REQ)
             connect_str  = self.node_handling_register_hash()
-            print(connect_str, args.addr + ":" + str(args.port))
+            self.logger.info(connect_str, args.addr + ":" + str(args.port))
             if "tcp://"+args.addr + ":" + str(args.port) == connect_str:
                 self.is_register_sock = True
             self.register_sock.connect(connect_str)
@@ -148,10 +148,10 @@ class DiscoveryMW ():
         """Function to receive messages from the pubs/subs/brokers."""
         while True:
             #  Wait for next request from client
-            print('Waiting for request...')
+            self.logger.info('Waiting for request...')
             message = self.rep.recv()
             if message == b'register':
-                print("RIGHT HERE")
+                self.logger.info("RIGHT HERE")
                 self.upcall_obj.update_register_counter()
                 self.rep.send(b'OK')
                 continue
@@ -162,25 +162,25 @@ class DiscoveryMW ():
                 else:
                     self.rep.send(b'NOT')
                 continue
-            print(f"Received request: {message}")
-            # Decode message and print
+            self.logger.info(f"Received request: {message}")
+            # Decode message and self.logger.info
             discovery_req_msg = discovery_pb2.DiscoveryReq()  # pylint: disable=no-member
             discovery_req_msg.ParseFromString(message)
-            print(discovery_req_msg.msg_type)
+            self.logger.info(discovery_req_msg.msg_type)
             # check type of message and apply chord algorithm to it
             if discovery_req_msg.msg_type == 1:
                 # register message
-                print("Register message")
+                self.logger.info("Register message")
                 self.handle_register_message(discovery_req_msg)
             elif discovery_req_msg.msg_type == 5:
-                print("regsiter message forwared from another node")
-                print(discovery_req_msg)
+                self.logger.info("regsiter message forwared from another node")
+                self.logger.info(discovery_req_msg)
                 self.handle_discovery_req_message(discovery_req_msg)
             elif discovery_req_msg.msg_type == 6:
                 self.handle_discovery_lookup_message(discovery_req_msg)
             elif discovery_req_msg.msg_type == 2:
-                print('is ready msg')
-                print(discovery_req_msg)
+                self.logger.info('is ready msg')
+                self.logger.info(discovery_req_msg)
                 if self.is_register_sock:
                     self.ready = self.upcall_obj.is_ready_flag()
                 else:
@@ -188,10 +188,10 @@ class DiscoveryMW ():
                     resp = self.register_sock.recv_string()
                     if resp == 'OK':
                         self.ready = True
-            print(f"Decoded message: {discovery_req_msg}")
+            self.logger.info(f"Decoded message: {discovery_req_msg}")
             resp_to_send = self.upcall_obj.handle_messages(discovery_req_msg)
 
-            print(resp_to_send)
+            self.logger.info(resp_to_send)
             buf2send = resp_to_send.SerializeToString()
             #  Do some 'work'
             time.sleep(1)
@@ -210,7 +210,7 @@ class DiscoveryMW ():
 
         # for each topic list, send a register message to the appropriate finger
         for topic, hash_topic in self.topics_hash:
-            print(topic, hash_topic)
+            self.logger.info(topic, hash_topic)
             # curr_node_handle call
             self.curr_node_handle_register(hash_topic, topic,
                                            discovery_req_msg.register_req.info.addr, 
@@ -219,12 +219,12 @@ class DiscoveryMW ():
 
         if self.is_register_sock:
             self.upcall_obj.update_register_counter()
-            print('updating register counter because I am the register node')
+            self.logger.info('updating register counter because I am the register node')
         else:
-            print("SENT MESSAGE TO REGISTER")
+            self.logger.info("SENT MESSAGE TO REGISTER")
             self.register_sock.send_string("register")
             resp = self.register_sock.recv_string()
-            print(resp)
+            self.logger.info(resp)
 
     def handle_discovery_req_message(self, discovery_req_msg):
         ''' Handle the discovery request message '''
@@ -251,18 +251,18 @@ class DiscoveryMW ():
         hash_topic = int(hash_topic)
 
         if self.predecessor < self.curr_node_hash:
-            print(hash_topic, self.curr_node_hash)
+            self.logger.info(hash_topic, self.curr_node_hash)
             if hash_topic > self.predecessor and hash_topic <= self.curr_node_hash:
                 # current node can handle this topic
-                print(
-                    'printing ip prot'
+                self.logger.info(
+                    'self.logger.infoing ip prot'
                 )
-                print(ip, port)
+                self.logger.info(ip, port)
                 self.upcall_obj.handle_register_message(
                     topic, hash_topic, ip, port, role)
             else:
                 # send regsiter request to appropriate finger
-                print('sendng to finger')
+                self.logger.info('sendng to finger')
                 self.send_to_finger(hash_topic, topic, ip, port, role)
         else:
             # this is the edge case when predecessor is largest node in the ring
@@ -272,7 +272,7 @@ class DiscoveryMW ():
                     topic, hash_topic, ip, port, role)
             else:
                 # send regsiter request to appropriate finger
-                print('sendng to finger2')
+                self.logger.info('sendng to finger2')
                 self.send_to_finger(hash_topic, topic, ip, port,role)
 
     def curr_node_handle_lookup(self, hash_topic, topic):
@@ -289,7 +289,7 @@ class DiscoveryMW ():
                     hash_topic, topic)
             else:
                 # send regsiter request to appropriate finger
-                print('sendng to finger')
+                self.logger.info('sendng to finger')
                 self.send_to_finger(hash_topic, topic, None, None, None, True)
         else:
             # this is the edge case when predecessor is largest node in the ring
@@ -299,14 +299,14 @@ class DiscoveryMW ():
                         hash_topic, topic)
             else:
                 # send regsiter request to appropriate finger
-                print('sendng to finger2')
+                self.logger.info('sendng to finger2')
                 self.send_to_finger(hash_topic, topic, None, None, None, True)
 
     def send_to_finger(self, hash_topic, topic, ip, port, role, lookup=False):
         ''' Send the register message to the finger '''
 
         chord = Chord()
-        print('chord initialized')
+        self.logger.info('chord initialized')
         node_value = chord.chord_algo(hash_topic, self.finger_table)
 
         socket = self.finger_sockets[node_value]["socket"]
@@ -316,10 +316,10 @@ class DiscoveryMW ():
         else:
             disc_req = self.construct_discover_register_msg(node_value, topic,
                                                         hash_topic, ip, port, role)
-        print(socket)
-        print('seding to ', node_value, )
+        self.logger.info(socket)
+        self.logger.info('seding to ', node_value, )
         socket.send(disc_req.SerializeToString())
-        print('sent now waiting for response')
+        self.logger.info('sent now waiting for response')
         # wait for response
         response = socket.recv()
         # TODO: handle the response
@@ -328,12 +328,12 @@ class DiscoveryMW ():
             '''deconde tthe response'''
             disc_resp = discovery_pb2.DiscoveryResp()  # pylint: disable=no-member
             disc_resp.ParseFromString(response)
-            print(disc_req)
+            self.logger.info(disc_req)
             #set state in the upcall object
             self.upcall_obj.handle_lookup_resposne(disc_resp, disc_req.disc_reg_req.topic)
-            print(disc_resp)
-            print(type(response))
-        print(response)
+            self.logger.info(disc_resp)
+            self.logger.info(type(response))
+        self.logger.info(response)
 
     def construct_discover_register_msg(self, node_value, topic, topic_hash, ip, port, role):
         ''' Construct the discovery register message '''
@@ -414,11 +414,11 @@ class DiscoveryMW ():
         self.logger.info("DiscoveryMW::node_handling_register_hash")
         # get the hash of the current node
         register_hash = self.hash_func('register')
-        print(register_hash)
+        self.logger.info(register_hash)
         # find node which can handle this hash
         node_id, ip, port = find_node_hash(register_hash)
-        print(ip)
-        print(node_id)
+        self.logger.info(ip)
+        self.logger.info(node_id)
         return "tcp://" + ip + ":" + str(port)
 
     def system_ready(self):

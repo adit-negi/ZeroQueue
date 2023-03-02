@@ -167,6 +167,7 @@ class DiscoveryAppln():
             disc_resp = discovery_pb2.DiscoveryResp()  # pylint: disable=no-member
             disc_resp.register_resp.CopyFrom(register_resp)
             disc_resp.msg_type = discovery_pb2.TYPE_REGISTER  # pylint: disable=no-member
+            self.logger.info('sending back response')
             return disc_resp
         else:
             self.logger.error(

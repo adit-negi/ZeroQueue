@@ -134,7 +134,8 @@ class DiscoveryMW ():
 
             self.register_sock = context.socket(zmq.REQ)
             connect_str  = self.node_handling_register_hash()
-            self.logger.info(connect_str, args.addr + ":" + str(args.port))
+            self.logger.info(connect_str)
+            self.logger.info(args.addr + ":" + str(args.port))
             if "tcp://"+args.addr + ":" + str(args.port) == connect_str:
                 self.is_register_sock = True
             self.register_sock.connect(connect_str)
@@ -210,7 +211,8 @@ class DiscoveryMW ():
 
         # for each topic list, send a register message to the appropriate finger
         for topic, hash_topic in self.topics_hash:
-            self.logger.info(topic, hash_topic)
+            self.logger.info(topic)
+            self.logger.info(hash_topic)
             # curr_node_handle call
             self.curr_node_handle_register(hash_topic, topic,
                                            discovery_req_msg.register_req.info.addr, 
@@ -257,7 +259,8 @@ class DiscoveryMW ():
                 self.logger.info(
                     'self.logger.infoing ip prot'
                 )
-                self.logger.info(ip, port)
+                self.logger.info(ip)
+                self.logger.info(port)
                 self.upcall_obj.handle_register_message(
                     topic, hash_topic, ip, port, role)
             else:
@@ -317,7 +320,8 @@ class DiscoveryMW ():
             disc_req = self.construct_discover_register_msg(node_value, topic,
                                                         hash_topic, ip, port, role)
         self.logger.info(socket)
-        self.logger.info('seding to ', node_value, )
+        self.logger.info('seding to ' )
+        self.logger.info(node_value)
         socket.send(disc_req.SerializeToString())
         self.logger.info('sent now waiting for response')
         # wait for response

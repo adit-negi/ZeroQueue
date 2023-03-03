@@ -299,10 +299,10 @@ class SubscriberAppln ():
             # Notice how we get that loop effect with the sleep (10)
             # by an interaction between the event loop and these
             # upcall methods.
-            print(lookup_resp.port)
+            self.logger.info(lookup_resp.port)
             if not lookup_resp.status:
                 # discovery service is not ready yet
-                self.logger.debug(
+                self.logger.info(
                     "SubscriberAppln::driver - Not ready yet; check again")
                 # sleep between calls so that we don't make excessive calls
 

@@ -142,7 +142,7 @@ class DiscoveryMW ():
             self.logger.info(args.addr + ":" + str(args.port))
             if "tcp://"+args.addr + ":" + str(args.port) == connect_str:
                 self.is_register_sock = True
-            self.register_sock.setsockopt(zmq.RCVTIMEO, 10000)
+            self.register_sock.setsockopt(zmq.RCVTIMEO, 3000)
             self.register_sock.setsockopt(zmq.LINGER, 0)
             self.register_sock.setsockopt(zmq.REQ_RELAXED,1)
             self.register_sock.connect(connect_str)
@@ -248,7 +248,20 @@ class DiscoveryMW ():
             self.logger.info(resp)
             if not resp:
                 self.logger.info('timeout')
-                print('didnt get response breaking out')
+                self.logger.info('didnt get response breaking out')
+                for sleep in [5,10,15,20, 25]:
+                    time.sleep(sleep)
+                    self.logger.info("trying again")
+                    self.register_sock.send_string("register")
+                    resp = None
+                    try:
+                        resp = self.register_sock.recv_string()
+                    except:
+                        resp = None
+                        self.logger.info("request timed out")
+                    if resp == 'OK':
+                        self.logger.info('got response')
+                        break
     def handle_discovery_req_message(self, discovery_req_msg):
         ''' Handle the discovery request message '''
         topic = discovery_req_msg.disc_reg_req.topic

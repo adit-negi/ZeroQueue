@@ -243,13 +243,12 @@ class DiscoveryAppln():
                     print("CHECKING AGAIN")
                     #check again
                     if topic in self.pubs_by_topic:
-                        flag = True
+
                         for pub in self.pubs_by_topic[topic]:
                             pubs_array.append(pub["name"])
                             addr.append(pub["ip"])
                             ports.append(pub["port"])
-                    else:
-                        flag = False
+                  
 
             pubs_array = list(set(pubs_array))
 
@@ -262,7 +261,7 @@ class DiscoveryAppln():
                 lookup_resp.status = 0
             else:
                 lookup_resp.status = 1
-            if len(pubs_array)<self.configured_pubs:
+            if len(pubs_array)<1:
                 lookup_resp.status = 0
             print(lookup_resp.status)
             disc_resp = discovery_pb2.DiscoveryResp()  # pylint: disable=no-member

@@ -294,7 +294,7 @@ class SubscriberAppln ():
 
         try:
             self.logger.info("SubscriberAppln::lookup_response")
-
+            self.logger.info(lookup_resp)
             # Notice how we get that loop effect with the sleep (10)
             # by an interaction between the event loop and these
             # upcall methods.

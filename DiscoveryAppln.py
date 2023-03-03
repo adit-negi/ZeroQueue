@@ -235,9 +235,9 @@ class DiscoveryAppln():
                 for topic in topics:
                     topic_hash = self.mw_obj.hash_func(topic)
                     # for each topic hash find the finger node and forward the request
-                    print(self.pubs_by_topic)
-                        
-                    self.mw_obj.curr_node_handle_lookup(topic_hash, topic)
+                    self.logger.info(self.pubs_by_topic)
+                    if topic not in self.pubs_by_topic:
+                        self.mw_obj.curr_node_handle_lookup(topic_hash, topic)
                     
                     print(topic)
                     print("CHECKING AGAIN")

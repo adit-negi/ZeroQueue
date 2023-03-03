@@ -27,14 +27,14 @@ h24 sleep 15
 h14 python3 PublisherAppln.py -n pub2  -a 10.0.0.14 -T 5 > pub2.out 2>&1 &
 h24 sleep 15
 h15 python3 PublisherAppln.py -n pub5  -a 10.0.0.15 -T 5 > pub5.out 2>&1 &  
-h24 sleep 15
+h24 sleep 30
 h8 python3 SubscriberAppln.py -n sub1 -p 7771  -T 7 > sub1.out 2>&1 &
-h24 sleep 15
+h24 sleep 20
 h8 python3 SubscriberAppln.py -n sub2  -T 5 > sub2.out 2>&1 &
-h24 sleep 15
+h24 sleep 20
 h10 python3 SubscriberAppln.py -n sub3  -T 9 > sub3.out 2>&1 &
-h24 sleep 15
+h24 sleep 20
 h17 python3 SubscriberAppln.py -n sub4 -p 7772 -T 7 > sub4.out 2>&1 &
-h24 sleep 15
+h24 sleep 20
 h17 python3 SubscriberAppln.py -n sub5  -T 7 > sub5.out 2>&1 &
-h24 sleep 15
+h24 sleep 20

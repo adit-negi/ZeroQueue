@@ -330,7 +330,8 @@ class DiscoveryAppln():
         self.curr_registered+=1
     def is_ready_flag(self):
         """Return the is_ready flag."""
-        print('curr_registered', self.curr_registered)
+        self.logger.info('getting is ready request internally')
+        self.logger.info('curr_registered', self.curr_registered)
         return self.curr_registered>=self.number_of_pubsub
 
     def handle_lookup_message(self, hash_topic, topic):

@@ -116,7 +116,7 @@ class SubscriberMW ():
             # For our assignments we will use TCP. The connect string is made up of
             # tcp:// followed by IP addr:port number.
             random_discovery = utils.get_random_disc_node()
-            print(random_discovery)
+            self.logger.info(random_discovery)
             connect_str = "tcp://" + random_discovery
             self.req.connect(connect_str)
 

@@ -27,6 +27,7 @@
 # store all these time series data in some database for later analytics.
 
 # import the needed packages
+import random
 import time   # for sleep
 import argparse  # for argument parsing
 import configparser  # for configuration parsing
@@ -306,9 +307,9 @@ class SubscriberAppln ():
                     "SubscriberAppln::driver - Not ready yet; check again")
                 # sleep between calls so that we don't make excessive calls
 
-                time.sleep(self.sleep)
+                time.sleep(random.choice([8,10,12,14]))
                 # increase the sleep time so that we don't make excessive calls
-                self.sleep += 5
+                
 
             else:
                 # we got the go ahead

@@ -426,7 +426,7 @@ def parse_cmd_line_args():
                         help="Rate at which topics disseminated:" +
                         "default once a second - use integers")
 
-    parser.add_argument("-i", "--iters", type=int, default=1000,
+    parser.add_argument("-i", "--iters", type=int, default=10000,
                         help="number of publication iterations (default: 1000)")
 
     parser.add_argument("-l", "--loglevel", type=int, default=logging.INFO, choices=[

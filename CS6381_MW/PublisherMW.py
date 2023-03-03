@@ -30,6 +30,7 @@ import zmq  # ZMQ sockets
 
 # import serialization logic
 from CS6381_MW import discovery_pb2
+import utils
 # from CS6381_MW import topic_pb2  # you will need this eventually
 
 # import any other packages you need.
@@ -46,7 +47,7 @@ class PublisherMW ():
     # constructor
     ########################################
     def __init__(self, logger):
-        self.logger = logger  # internal logger for print statements
+        self.logger = logger  # internal logger for self.logger.info statements
         self.req = None  # will be a ZMQ REQ socket to talk to Discovery service
         self.pub = None  # will be a ZMQ PUB socket for dissemination
         self.poller = None  # used to wait on incoming replies
@@ -100,7 +101,9 @@ class PublisherMW ():
                 "PublisherMW::configure - connect to Discovery service")
             # For our assignments we will use TCP. The connect string is made up of
             # tcp:// followed by IP addr:port number.
-            connect_str = "tcp://" + args.discovery
+            connect_str = "tcp://" + utils.get_random_disc_node()
+            self.logger.info("connecting to random desc node")
+            self.logger.info(connect_str)
             self.req.connect(connect_str)
 
             # Since we are the publisher, the best practice as suggested in ZMQ is for us to
@@ -170,7 +173,7 @@ class PublisherMW ():
 
             # let us first receive all the bytes
             bytes_rcvd = self.req.recv()
-            print(bytes_rcvd)
+            self.logger.info(bytes_rcvd)
             # now use protobuf to deserialize the bytes
             # The way to do this is to first allocate the space for the
             # message we expect, here DiscoveryResp and then parse
@@ -191,7 +194,7 @@ class PublisherMW ():
                 # this is a response to is ready request
                 timeout = self.upcall_obj.isready_response(
                     disc_resp.isready_resp)
-                print(timeout)
+                self.logger.info(timeout)
             else:  # anything else is unrecognizable by this object
                 # raise an exception here
                 raise ValueError("Unrecognized response message")
@@ -259,7 +262,7 @@ class PublisherMW ():
             self.logger.debug(
                 "PublisherMW::register - done building the outer message")
 
-            # now let us stringify the buffer and print it.
+            # now let us stringify the buffer and self.logger.info it.
             # This is actually a sequence of bytes and not
             # a real string
             buf2send = disc_req.SerializeToString()
@@ -320,7 +323,7 @@ class PublisherMW ():
             self.logger.debug(
                 "PublisherMW::is_ready - done building the outer message")
 
-            # now let us stringify the buffer and print it.
+            # now let us stringify the buffer and self.logger.info it.
             # This is actually a sequence of bytes and not a real string
             buf2send = disc_req.SerializeToString()
             self.logger.debug(

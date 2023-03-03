@@ -27,6 +27,7 @@
 # store all these time series data in some database for later analytics.
 
 # import the needed packages
+import random
 import time   # for sleep
 import argparse  # for argument parsing
 import configparser  # for configuration parsing
@@ -79,6 +80,7 @@ class SubscriberAppln ():
         self.publisher_data = {}  # dictionary of publisher data
         self.ports = []
         self.addrs = []
+        self.sleep = 10
     ########################################
     # configure/initialize
     ########################################
@@ -294,17 +296,20 @@ class SubscriberAppln ():
 
         try:
             self.logger.info("SubscriberAppln::lookup_response")
-
+            self.logger.info(lookup_resp)
             # Notice how we get that loop effect with the sleep (10)
             # by an interaction between the event loop and these
             # upcall methods.
-            print(lookup_resp.port)
+            self.logger.info(lookup_resp.port)
             if not lookup_resp.status:
                 # discovery service is not ready yet
-                self.logger.debug(
+                self.logger.info(
                     "SubscriberAppln::driver - Not ready yet; check again")
                 # sleep between calls so that we don't make excessive calls
-                time.sleep(10)
+
+                time.sleep(random.choice([8,10,12,14]))
+                # increase the sleep time so that we don't make excessive calls
+                
 
             else:
                 # we got the go ahead

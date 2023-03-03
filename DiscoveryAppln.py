@@ -127,7 +127,7 @@ class DiscoveryAppln():
             self.logger.info("DiscoveryAppln: handle_messages - lookup")
             return self.discovery_lookup_response(msg)
         else:
-            self.logger.error(
+            self.logger.info(
                 "DiscoveryAppln: handle_messages - unknown method")
         return None
 
@@ -170,7 +170,7 @@ class DiscoveryAppln():
             self.logger.info('sending back response')
             return disc_resp
         else:
-            self.logger.error(
+            self.logger.info(
                 "DiscoveryAppln: register - unknown method")
         return None
 

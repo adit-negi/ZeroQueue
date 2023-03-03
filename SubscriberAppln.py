@@ -79,6 +79,7 @@ class SubscriberAppln ():
         self.publisher_data = {}  # dictionary of publisher data
         self.ports = []
         self.addrs = []
+        self.sleep = 10
     ########################################
     # configure/initialize
     ########################################
@@ -304,7 +305,10 @@ class SubscriberAppln ():
                 self.logger.debug(
                     "SubscriberAppln::driver - Not ready yet; check again")
                 # sleep between calls so that we don't make excessive calls
-                time.sleep(10)
+
+                time.sleep(self.sleep)
+                # increase the sleep time so that we don't make excessive calls
+                self.sleep += 5
 
             else:
                 # we got the go ahead

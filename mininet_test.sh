@@ -19,9 +19,9 @@ h19 python3 DiscoveryAppln.py -n disc6  -p 5555 > disc6.out 2>&1 &
 h19 python3 DiscoveryAppln.py -n disc7  -p 5556 > disc7.out 2>&1 &
 h19 python3 DiscoveryAppln.py -n disc12  -p 5557 > disc12.out 2>&1 &
 h12 python3 PublisherAppln.py -n pub3  -a 10.0.0.12 -T 5 > pub3.out 2>&1 &
-h24 h24 sleep 15
+h24 sleep 15
 h13 python3 PublisherAppln.py -n pub1  -a 10.0.0.13 -T 7 > pub1.out 2>&1 &
-h24 h24 sleep 15
+h24 sleep 15
 h13 python3 PublisherAppln.py -n pub4  -a 10.0.0.13 -p 7770 -T 8 > pub4.out 2>&1 &
 h24 sleep 15
 h14 python3 PublisherAppln.py -n pub2  -a 10.0.0.14 -T 5 > pub2.out 2>&1 &

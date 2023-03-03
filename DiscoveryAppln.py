@@ -407,7 +407,7 @@ def parse_cmd_line_args():
     parser.add_argument("-c", "--config", default="config.ini",
                         help="configuration file (default: config.ini)")
 
-    parser.add_argument("-t", "--numpubsub", type=int, default=10,
+    parser.add_argument("-t", "--numpubsub", type=int, default=5,
                         help="number of subscribers and Discoverys (default: 1000)")
 
     parser.add_argument("-l", "--loglevel", type=int, default=logging.INFO, choices=[

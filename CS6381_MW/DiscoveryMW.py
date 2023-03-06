@@ -125,7 +125,7 @@ class DiscoveryMW ():
                     
                     connect_str = "tcp://" + ip + ":" + str(port)
                     self.logger.info(connect_str)
-                    curr_req.setsockopt(zmq.RCVTIMEO, 15000)
+                    curr_req.setsockopt(zmq.RCVTIMEO, 5000)
                     curr_req.setsockopt(zmq.LINGER, 0)
                     curr_req.setsockopt(zmq.REQ_RELAXED,1)
                     curr_req.connect(connect_str)
@@ -142,7 +142,7 @@ class DiscoveryMW ():
             self.logger.info(args.addr + ":" + str(args.port))
             if "tcp://"+args.addr + ":" + str(args.port) == connect_str:
                 self.is_register_sock = True
-            self.register_sock.setsockopt(zmq.RCVTIMEO, 3000)
+            self.register_sock.setsockopt(zmq.RCVTIMEO, 5000)
             self.register_sock.setsockopt(zmq.LINGER, 0)
             self.register_sock.setsockopt(zmq.REQ_RELAXED,1)
             self.register_sock.connect(connect_str)

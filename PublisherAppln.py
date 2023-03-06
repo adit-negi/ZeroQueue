@@ -43,7 +43,8 @@
 #
 
 # import the needed packages
-import os     # for OS functions
+import os
+import random     # for OS functions
 import sys    # for syspath and system exception
 import time   # for sleep
 import argparse  # for argument parsing
@@ -342,13 +343,15 @@ class PublisherAppln ():
             # by an interaction between the event loop and these
             # upcall methods.
             print("isready_resp.status = ", isready_resp.status)
-
+            self.sleep_time = 10
             if not isready_resp.status:
                 # discovery service is not ready yet
                 self.logger.debug(
                     "PublisherAppln::driver - Not ready yet; check again")
                 # sleep between calls so that we don't make excessive calls
-                time.sleep(10)
+
+                time.sleep(self.sleep_time)
+                self.sleep_time+=random.choice([8, 10, 12, 14])
 
             else:
                 # we got the go ahead

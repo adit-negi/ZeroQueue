@@ -195,9 +195,6 @@ class DiscoveryAppln():
 
             is_ready_resp.status = ready_flag
 
-
-            if self.dissemination !="Direct" and self.broker is None:
-                is_ready_resp.status = False
             disc_resp = discovery_pb2.DiscoveryResp()  # pylint: disable=no-member
             disc_resp.isready_resp.CopyFrom(is_ready_resp)
             disc_resp.msg_type = discovery_pb2.TYPE_ISREADY  # pylint: disable=no-member

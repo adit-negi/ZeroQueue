@@ -272,6 +272,8 @@ class BrokerMW ():
             # in the next iteration of the poll.
             if disc_resp.msg_type == discovery_pb2.TYPE_LOOKUP_PUB_BY_TOPIC:  # pylint: disable=no-member
                 # this is a response to is ready request
+                self.logger.info("BrokerMW::handle_reply - lookup response")
+                self.logger.info(disc_resp)
                 timeout = self.upcall_obj.lookup_response(
                     disc_resp.lookup_resp)
                 print('lookup response', timeout)

@@ -298,10 +298,17 @@ class SubscriberMW ():
         ''' register the appln with the discovery service '''
 
         try:
+            if self.upcall_obj.is_broker():
+                while True:
+                    time.sleep(10)
+                    ports, addrs, _, status = self.upcall_obj.broker_data()
+                    if status: break
+                return self.connect(ports, addrs, topiclist)
             self.logger.info("SubscriberMW::lookup")
             #give some time for system to bootstrap, immediate request will lead to 
             # uncneccessary retries
             time.sleep(10)
+            
             # send lookup req
             self.logger.debug(
                 "SubscriberMW::lookup - populate the nested lookup msg")

@@ -125,7 +125,7 @@ class DiscoveryMW ():
                     
                     connect_str = "tcp://" + ip + ":" + str(port)
                     self.logger.info(connect_str)
-                    curr_req.setsockopt(zmq.RCVTIMEO, 15000)
+                    curr_req.setsockopt(zmq.RCVTIMEO, 20000)
                     curr_req.setsockopt(zmq.LINGER, 0)
                     curr_req.setsockopt(zmq.REQ_RELAXED,1)
                     curr_req.connect(connect_str)
@@ -142,7 +142,7 @@ class DiscoveryMW ():
             self.logger.info(args.addr + ":" + str(args.port))
             if "tcp://"+args.addr + ":" + str(args.port) == connect_str:
                 self.is_register_sock = True
-            self.register_sock.setsockopt(zmq.RCVTIMEO, 3000)
+            self.register_sock.setsockopt(zmq.RCVTIMEO, 10000)
             self.register_sock.setsockopt(zmq.LINGER, 0)
             self.register_sock.setsockopt(zmq.REQ_RELAXED,1)
             self.register_sock.connect(connect_str)
@@ -217,21 +217,25 @@ class DiscoveryMW ():
     def handle_register_message(self, discovery_req_msg):
         ''' Handle the register message '''
         self.logger.debug("DiscoveryMW::handle_register_message")
-        topiclist = discovery_req_msg.register_req.topiclist
-        
-        
-        for topic in topiclist:
-            self.topics_hash.append((topic, self.hash_func(topic)))
+        if discovery_req_msg.register_req.role == 2:
+            self.logger.info("Register message for subscriber")
+        else:
+            self.logger.info("Register message for publisher -- handle topics")
+            topiclist = discovery_req_msg.register_req.topiclist
+            
+            
+            for topic in topiclist:
+                self.topics_hash.append((topic, self.hash_func(topic)))
 
-        # for each topic list, send a register message to the appropriate finger
-        for topic, hash_topic in self.topics_hash:
-            self.logger.info(topic)
-            self.logger.info(hash_topic)
-            # curr_node_handle call
-            self.curr_node_handle_register(hash_topic, topic,
-                                           discovery_req_msg.register_req.info.addr, 
-                                           discovery_req_msg.register_req.info.port,
-                                           discovery_req_msg.register_req.role)
+            # for each topic list, send a register message to the appropriate finger
+            for topic, hash_topic in self.topics_hash:
+                self.logger.info(topic)
+                self.logger.info(hash_topic)
+                # curr_node_handle call
+                self.curr_node_handle_register(hash_topic, topic,
+                                            discovery_req_msg.register_req.info.addr, 
+                                            discovery_req_msg.register_req.info.port,
+                                            discovery_req_msg.register_req.role)
 
         if self.is_register_sock:
             self.upcall_obj.update_register_counter()
@@ -246,7 +250,7 @@ class DiscoveryMW ():
                 resp = None
                 self.logger.info("request timed out")
             self.logger.info(resp)
-            if not resp:
+            while not resp:
                 self.logger.info('timeout')
                 self.logger.info('didnt get response breaking out')
                 for sleep in [5,10,15,20, 25]:
@@ -262,6 +266,8 @@ class DiscoveryMW ():
                     if resp == 'OK':
                         self.logger.info('got response')
                         break
+                if resp:
+                    break
     def handle_discovery_req_message(self, discovery_req_msg):
         ''' Handle the discovery request message '''
         topic = discovery_req_msg.disc_reg_req.topic
@@ -318,7 +324,9 @@ class DiscoveryMW ():
         self.curr_node_hash = int(self.curr_node_hash)
         self.predecessor = int(self.predecessor)
         hash_topic = int(hash_topic)
-
+        pubs_by_topic = self.upcall_obj.get_pubs_by_topic(topic)
+        if pubs_by_topic:
+            return
         if self.predecessor < self.curr_node_hash:
             if hash_topic > self.predecessor and hash_topic <= self.curr_node_hash:
                 # current node can handle this topic

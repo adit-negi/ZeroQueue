@@ -298,10 +298,17 @@ class SubscriberMW ():
         ''' register the appln with the discovery service '''
 
         try:
+            if self.upcall_obj.is_broker():
+                while True:
+                    time.sleep(10)
+                    ports, addrs, tp, status = self.upcall_obj.broker_data()
+                    if status: break
+                return self.connect(ports, addrs, tp)
             self.logger.info("SubscriberMW::lookup")
             #give some time for system to bootstrap, immediate request will lead to 
             # uncneccessary retries
-            time.sleep(5)
+            time.sleep(10)
+            
             # send lookup req
             self.logger.debug(
                 "SubscriberMW::lookup - populate the nested lookup msg")
@@ -349,16 +356,20 @@ class SubscriberMW ():
             self.logger.info("SubscriberMW::connect")
             # connect to the publisher
             print(f'tcp://{address[idx]}:{ports[idx]}')
+            self.logger.info(f'tcp://{address[idx]}:{ports[idx]}')
             self.sub.connect(f'tcp://{address[idx]}:{ports[idx]}')
+        self.logger.info('connected to publisher')
+        self.logger.info(topiclist)
         for topic in topiclist:
             self.sub.setsockopt_string(zmq.SUBSCRIBE, topic)
-        print('connected to publisher')
+        self.logger.info('connected to publisher')
         cnt = 0
         avg_delay =0
         while True:
+            self.logger.info('waiting for data')
             data = self.sub.recv().decode("utf-8")
-            print(data)
             self.logger.info(data)
+
             t1 = data.split('_')[-1]
             t1 = parser.parse(t1)
             t2 = datetime.now()

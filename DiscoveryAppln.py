@@ -156,7 +156,11 @@ class DiscoveryAppln():
                  "port": msg.register_req.info.port, "topics": msg.register_req.topiclist}
             elif msg.register_req.role == 3:
                 print('recived request to register broker')
-                self.broker = msg.register_req.info.addr + ":" + str(msg.register_req.info.port)
+                self.broker = "10.0.0.10" + ":" + str(msg.register_req.info.port)
+                json_object = json.dumps({"broker":self.broker}, indent=4)
+                # Writing to sample.json
+                with open("broker.json", "w") as outfile:
+                    outfile.write(json_object)
             else:
                 print('recived request to register subscriber')
             return disc_resp
@@ -191,9 +195,6 @@ class DiscoveryAppln():
 
             is_ready_resp.status = ready_flag
 
-
-            if self.dissemination !="Direct" and self.broker is None:
-                is_ready_resp.status = False
             disc_resp = discovery_pb2.DiscoveryResp()  # pylint: disable=no-member
             disc_resp.isready_resp.CopyFrom(is_ready_resp)
             disc_resp.msg_type = discovery_pb2.TYPE_ISREADY  # pylint: disable=no-member
@@ -224,6 +225,13 @@ class DiscoveryAppln():
             flag = True
             if len(topics)==1 and topics[0]=="broker_overrides":
                 print("broker_overrides")
+                # Opening JSON file
+                with open('broker.json', 'r') as openfile:
+                
+                    # Reading from json file
+                    json_object = json.load(openfile)
+                    if "broker" in json_object:
+                        self.broker = json_object["broker"]
                 if not self.broker:
                     flag = False
                 else:
@@ -294,14 +302,14 @@ class DiscoveryAppln():
             disc_resp.msg_type = discovery_pb2.TYPE_LOOKUP_PUB_BY_TOPIC  # pylint: disable=no-member
             return disc_resp
         else:
-            print("no publishers yet --- retry", topic)
+            print("no publishers yet", topic)
             print(self.pubs_by_topic)
             lookup_resp = discovery_pb2.LookupPubByTopicResp()  # pylint: disable=no-member
             lookup_resp.pubname[:] = pubs_array
 
             lookup_resp.addr[:] = addr
             lookup_resp.port[:] = ports
-            lookup_resp.status = 0
+            lookup_resp.status = 1
             disc_resp = discovery_pb2.DiscoveryResp()  # pylint: disable=no-member
             disc_resp.lookup_resp.CopyFrom(lookup_resp)
             disc_resp.msg_type = discovery_pb2.TYPE_LOOKUP_PUB_BY_TOPIC  # pylint: disable=no-member
@@ -357,7 +365,11 @@ class DiscoveryAppln():
             if f:
                 continue
             self.pubs_by_topic[topic].append({'name':pubs[i], 'ip':addr[i], 'port':str(ports[i])})
-
+    
+    def get_pubs_by_topic(self, topic):
+        if topic in self.pubs_by_topic:
+            return self.pubs_by_topic[topic]
+        return None
 def main():
 
     """Main driver for the Discovery service."""

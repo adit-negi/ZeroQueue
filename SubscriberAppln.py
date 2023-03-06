@@ -27,6 +27,7 @@
 # store all these time series data in some database for later analytics.
 
 # import the needed packages
+import json
 import random
 import time   # for sleep
 import argparse  # for argument parsing
@@ -291,6 +292,22 @@ class SubscriberAppln ():
     #
     # Also a part of upcall handled by application logic
     ########################################
+    def is_broker(self):
+        return self.dissemination == 'Broker'
+
+    def broker_data(self):
+        with open('broker.json', 'r') as openfile:
+                
+            # Reading from json file
+            json_object = json.load(openfile)
+        if "broker" in json_object:
+            self.broker = json_object["broker"]
+            ports, addrs = [self.broker.split(":")[1]], [self.broker.split(":")[0]]
+            topiclist= ["weather", "humidity", "airquality", "light","pressure", "temperature", "sound", "altitude","location"]
+
+            return ports, addrs,self.topiclist, True
+        else:
+            return None, None, None, False
     def lookup_response(self, lookup_resp):
         ''' handle isready response '''
 
@@ -307,7 +324,7 @@ class SubscriberAppln ():
                     "SubscriberAppln::driver - Not ready yet; check again")
                 # sleep between calls so that we don't make excessive calls
 
-                time.sleep(random.choice([8,10,12,14]))
+                time.sleep(random.choice([8, 10, 12, 14, 16]))
                 # increase the sleep time so that we don't make excessive calls
                 
 

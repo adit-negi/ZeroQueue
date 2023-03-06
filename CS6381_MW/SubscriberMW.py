@@ -301,7 +301,7 @@ class SubscriberMW ():
             self.logger.info("SubscriberMW::lookup")
             #give some time for system to bootstrap, immediate request will lead to 
             # uncneccessary retries
-            time.sleep(5)
+            time.sleep(10)
             # send lookup req
             self.logger.debug(
                 "SubscriberMW::lookup - populate the nested lookup msg")

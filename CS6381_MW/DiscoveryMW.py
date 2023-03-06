@@ -125,7 +125,7 @@ class DiscoveryMW ():
                     
                     connect_str = "tcp://" + ip + ":" + str(port)
                     self.logger.info(connect_str)
-                    curr_req.setsockopt(zmq.RCVTIMEO, 5000)
+                    curr_req.setsockopt(zmq.RCVTIMEO, 15000)
                     curr_req.setsockopt(zmq.LINGER, 0)
                     curr_req.setsockopt(zmq.REQ_RELAXED,1)
                     curr_req.connect(connect_str)
@@ -217,21 +217,25 @@ class DiscoveryMW ():
     def handle_register_message(self, discovery_req_msg):
         ''' Handle the register message '''
         self.logger.debug("DiscoveryMW::handle_register_message")
-        topiclist = discovery_req_msg.register_req.topiclist
-        
-        
-        for topic in topiclist:
-            self.topics_hash.append((topic, self.hash_func(topic)))
+        if discovery_req_msg.register_req.role == 2:
+            self.logger.info("Register message for subscriber")
+        else:
+            self.logger.info("Register message for publisher -- handle topics")
+            topiclist = discovery_req_msg.register_req.topiclist
+            
+            
+            for topic in topiclist:
+                self.topics_hash.append((topic, self.hash_func(topic)))
 
-        # for each topic list, send a register message to the appropriate finger
-        for topic, hash_topic in self.topics_hash:
-            self.logger.info(topic)
-            self.logger.info(hash_topic)
-            # curr_node_handle call
-            self.curr_node_handle_register(hash_topic, topic,
-                                           discovery_req_msg.register_req.info.addr, 
-                                           discovery_req_msg.register_req.info.port,
-                                           discovery_req_msg.register_req.role)
+            # for each topic list, send a register message to the appropriate finger
+            for topic, hash_topic in self.topics_hash:
+                self.logger.info(topic)
+                self.logger.info(hash_topic)
+                # curr_node_handle call
+                self.curr_node_handle_register(hash_topic, topic,
+                                            discovery_req_msg.register_req.info.addr, 
+                                            discovery_req_msg.register_req.info.port,
+                                            discovery_req_msg.register_req.role)
 
         if self.is_register_sock:
             self.upcall_obj.update_register_counter()

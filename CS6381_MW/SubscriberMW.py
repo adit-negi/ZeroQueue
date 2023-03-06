@@ -358,12 +358,15 @@ class SubscriberMW ():
             print(f'tcp://{address[idx]}:{ports[idx]}')
             self.logger.info(f'tcp://{address[idx]}:{ports[idx]}')
             self.sub.connect(f'tcp://{address[idx]}:{ports[idx]}')
+        self.logger.info('connected to publisher')
+        self.logger.info(topiclist)
         for topic in topiclist:
             self.sub.setsockopt_string(zmq.SUBSCRIBE, topic)
         self.logger.info('connected to publisher')
         cnt = 0
         avg_delay =0
         while True:
+            self.logger.info('waiting for data')
             data = self.sub.recv().decode("utf-8")
             self.logger.info(data)
 

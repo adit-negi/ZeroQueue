@@ -324,7 +324,9 @@ class DiscoveryMW ():
         self.curr_node_hash = int(self.curr_node_hash)
         self.predecessor = int(self.predecessor)
         hash_topic = int(hash_topic)
-
+        pubs_by_topic = self.upcall_obj.get_pubs_by_topic(topic)
+        if pubs_by_topic:
+            return
         if self.predecessor < self.curr_node_hash:
             if hash_topic > self.predecessor and hash_topic <= self.curr_node_hash:
                 # current node can handle this topic

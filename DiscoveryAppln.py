@@ -368,7 +368,11 @@ class DiscoveryAppln():
             if f:
                 continue
             self.pubs_by_topic[topic].append({'name':pubs[i], 'ip':addr[i], 'port':str(ports[i])})
-
+    
+    def get_pubs_by_topic(self, topic):
+        if topic in self.pubs_by_topic:
+            return self.pubs_by_topic[topic]
+        return None
 def main():
 
     """Main driver for the Discovery service."""

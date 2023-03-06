@@ -301,15 +301,13 @@ class SubscriberAppln ():
             # by an interaction between the event loop and these
             # upcall methods.
             self.logger.info(lookup_resp.port)
-            self.sleep_time = 10
             if not lookup_resp.status:
                 # discovery service is not ready yet
                 self.logger.info(
                     "SubscriberAppln::driver - Not ready yet; check again")
                 # sleep between calls so that we don't make excessive calls
 
-                time.sleep(self.sleep_time)
-                self.sleep_time+=random.choice([8, 10, 12, 14])
+                time.sleep(random.choice([8, 10, 12, 14, 16]))
                 # increase the sleep time so that we don't make excessive calls
                 
 

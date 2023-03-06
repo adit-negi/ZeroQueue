@@ -157,6 +157,10 @@ class DiscoveryAppln():
             elif msg.register_req.role == 3:
                 print('recived request to register broker')
                 self.broker = msg.register_req.info.addr + ":" + str(msg.register_req.info.port)
+                json_object = json.dumps({"broker":self.broker}, indent=4)
+                # Writing to sample.json
+                with open("broker.json", "w") as outfile:
+                    outfile.write(json_object)
             else:
                 print('recived request to register subscriber')
             return disc_resp
@@ -224,6 +228,13 @@ class DiscoveryAppln():
             flag = True
             if len(topics)==1 and topics[0]=="broker_overrides":
                 print("broker_overrides")
+                # Opening JSON file
+                with open('broker.json', 'r') as openfile:
+                
+                    # Reading from json file
+                    json_object = json.load(openfile)
+                    if "broker" in json_object:
+                        self.broker = json_object["broker"]
                 if not self.broker:
                     flag = False
                 else:

@@ -247,6 +247,8 @@ class BrokerMW ():
         print('connected to Broker')
         while True:
             data_recv = self.sub.recv()
+            self.logger.info("BrokerMW::dissimenate")
+            self.logger.info(data_recv)
             self.pub.send(data_recv)
 
 

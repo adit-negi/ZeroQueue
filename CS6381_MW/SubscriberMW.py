@@ -356,16 +356,17 @@ class SubscriberMW ():
             self.logger.info("SubscriberMW::connect")
             # connect to the publisher
             print(f'tcp://{address[idx]}:{ports[idx]}')
+            self.logger.info(f'tcp://{address[idx]}:{ports[idx]}')
             self.sub.connect(f'tcp://{address[idx]}:{ports[idx]}')
         for topic in topiclist:
             self.sub.setsockopt_string(zmq.SUBSCRIBE, topic)
-        print('connected to publisher')
+        self.logger.info('connected to publisher')
         cnt = 0
         avg_delay =0
         while True:
             data = self.sub.recv().decode("utf-8")
-            print(data)
             self.logger.info(data)
+
             t1 = data.split('_')[-1]
             t1 = parser.parse(t1)
             t2 = datetime.now()

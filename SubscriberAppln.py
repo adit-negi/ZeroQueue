@@ -305,7 +305,7 @@ class SubscriberAppln ():
             ports, addrs = [self.broker.split(":")[1]], [self.broker.split(":")[0]]
             topiclist= ["weather", "humidity", "airquality", "light","pressure", "temperature", "sound", "altitude","location"]
 
-            return ports, addrs,topiclist, True
+            return ports, addrs,self.topiclist, True
         else:
             return None, None, None, False
     def lookup_response(self, lookup_resp):

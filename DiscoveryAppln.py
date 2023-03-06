@@ -305,14 +305,14 @@ class DiscoveryAppln():
             disc_resp.msg_type = discovery_pb2.TYPE_LOOKUP_PUB_BY_TOPIC  # pylint: disable=no-member
             return disc_resp
         else:
-            print("no publishers yet --- retry", topic)
+            print("no publishers yet", topic)
             print(self.pubs_by_topic)
             lookup_resp = discovery_pb2.LookupPubByTopicResp()  # pylint: disable=no-member
             lookup_resp.pubname[:] = pubs_array
 
             lookup_resp.addr[:] = addr
             lookup_resp.port[:] = ports
-            lookup_resp.status = 0
+            lookup_resp.status = 1
             disc_resp = discovery_pb2.DiscoveryResp()  # pylint: disable=no-member
             disc_resp.lookup_resp.CopyFrom(lookup_resp)
             disc_resp.msg_type = discovery_pb2.TYPE_LOOKUP_PUB_BY_TOPIC  # pylint: disable=no-member

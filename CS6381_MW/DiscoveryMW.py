@@ -246,7 +246,7 @@ class DiscoveryMW ():
                 resp = None
                 self.logger.info("request timed out")
             self.logger.info(resp)
-            if not resp:
+            while not resp:
                 self.logger.info('timeout')
                 self.logger.info('didnt get response breaking out')
                 for sleep in [5,10,15,20, 25]:
@@ -262,6 +262,8 @@ class DiscoveryMW ():
                     if resp == 'OK':
                         self.logger.info('got response')
                         break
+                if resp:
+                    break
     def handle_discovery_req_message(self, discovery_req_msg):
         ''' Handle the discovery request message '''
         topic = discovery_req_msg.disc_reg_req.topic

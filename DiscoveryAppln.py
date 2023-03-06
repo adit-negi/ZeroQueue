@@ -156,7 +156,7 @@ class DiscoveryAppln():
                  "port": msg.register_req.info.port, "topics": msg.register_req.topiclist}
             elif msg.register_req.role == 3:
                 print('recived request to register broker')
-                self.broker = msg.register_req.info.addr + ":" + str(msg.register_req.info.port)
+                self.broker = "10.0.0.10" + ":" + str(msg.register_req.info.port)
                 json_object = json.dumps({"broker":self.broker}, indent=4)
                 # Writing to sample.json
                 with open("broker.json", "w") as outfile:

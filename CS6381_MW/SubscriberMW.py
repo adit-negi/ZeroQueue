@@ -336,7 +336,7 @@ class SubscriberMW ():
                 "Stringified serialized buf = %s", buf2send)
 
             # now send this to our discovery service
-            self.logger.debug(
+            self.logger.info(
                 "SubscriberMW::lookup - send stringified buffer to Discovery service")
             # we use the "send" method of ZMQ that sends the bytes
             lock = (json.load(open('lockfile.json')))['lock']

@@ -38,6 +38,7 @@
 # import the needed packages
 import csv
 from datetime import datetime
+import json
 import time
 from dateutil import parser
 import zmq  # ZMQ sockets
@@ -338,8 +339,20 @@ class SubscriberMW ():
             self.logger.debug(
                 "SubscriberMW::lookup - send stringified buffer to Discovery service")
             # we use the "send" method of ZMQ that sends the bytes
-            self.req.send(buf2send)
+            lock = (json.load(open('data.json')))['lock']
+            while True:
+                if not lock:
+                    break
+                time.sleep(10)
+                lock = (json.load(open('data.json')))['lock'] 
+            
 
+            self.req.send(buf2send)
+            json_object = json.dumps({'lock':True}, indent=4)
+ 
+            # Writing to sample.json
+            with open("lockfile.json", "w") as outfile:
+                outfile.write(json_object)
             # now go to our event loop to receive a response to this request
             self.logger.info(
                 "SubscriberMW::lookup - request sent and now wait for reply")

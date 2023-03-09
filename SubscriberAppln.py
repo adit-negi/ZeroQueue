@@ -318,6 +318,12 @@ class SubscriberAppln ():
             # by an interaction between the event loop and these
             # upcall methods.
             self.logger.info(lookup_resp.port)
+
+            json_object = json.dumps({'lock':False}, indent=4)
+ 
+            # Writing to sample.json
+            with open("CS6381_MW/lockfile.json", "w") as outfile:
+                outfile.write(json_object)
             if not lookup_resp.status:
                 # discovery service is not ready yet
                 self.logger.info(

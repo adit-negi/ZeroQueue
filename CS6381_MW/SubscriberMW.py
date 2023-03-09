@@ -339,17 +339,18 @@ class SubscriberMW ():
             self.logger.debug(
                 "SubscriberMW::lookup - send stringified buffer to Discovery service")
             # we use the "send" method of ZMQ that sends the bytes
-            lock = (json.load(open('data.json')))['lock']
+            lock = (json.load(open('lockfile.json')))['lock']
+            self.logger.info("lock is %s", str(lock))
             while True:
                 if not lock:
                     break
                 time.sleep(10)
-                lock = (json.load(open('data.json')))['lock'] 
+                lock = (json.load(open('lockfile.json')))['lock'] 
             
 
             self.req.send(buf2send)
             json_object = json.dumps({'lock':True}, indent=4)
- 
+            self.logger.info('locking file')
             # Writing to sample.json
             with open("lockfile.json", "w") as outfile:
                 outfile.write(json_object)

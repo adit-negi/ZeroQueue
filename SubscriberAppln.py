@@ -322,6 +322,7 @@ class SubscriberAppln ():
             json_object = json.dumps({'lock':False}, indent=4)
  
             # Writing to sample.json
+            self.logger.info('releasing lock')
             with open("CS6381_MW/lockfile.json", "w") as outfile:
                 outfile.write(json_object)
             if not lookup_resp.status:

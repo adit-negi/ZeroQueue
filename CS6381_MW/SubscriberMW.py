@@ -232,6 +232,15 @@ class SubscriberMW ():
             # and our whereabouts, e.g., name, IP and port
 
             # The following code shows serialization using the protobuf generated code.
+            lock = self.upcall_obj.get_lock()  # get the lock
+            while True:
+
+                if not lock:
+                    break
+                time.sleep(10)
+                lock = self.upcall_obj.get_lock()
+
+            self.upcall_obj.set_lock(True)
 
             # Build the Registrant Info message first.
             self.logger.debug(
@@ -339,21 +348,9 @@ class SubscriberMW ():
             self.logger.info(
                 "SubscriberMW::lookup - send stringified buffer to Discovery service")
             # we use the "send" method of ZMQ that sends the bytes
-
-            
-            lock = self.upcall_obj.get_lock()
-            self.logger.info("lock is %s", str(lock))
-            while True:
-                if not lock:
-                    break
-                self.logger.info("waiting for lock to be resolved")
-                time.sleep(10)
-                lock = self.upcall_obj.get_lock()
-            
-
             self.req.send(buf2send)
             self.logger.info('setting lock')
-            self.upcall_obj.set_lock(True)
+
             # now go to our event loop to receive a response to this request
             self.logger.info(
                 "SubscriberMW::lookup - request sent and now wait for reply")

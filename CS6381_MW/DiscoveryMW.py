@@ -369,7 +369,7 @@ class DiscoveryMW ():
         # wait for response
         response = None
         try:
-            response = socket.recv(zmq.NOBLOCK)
+            response = socket.recv()
         except:
             self.logger.info('timeout')
             print('didnt get response breaking out')

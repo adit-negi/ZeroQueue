@@ -38,6 +38,7 @@
 # import the needed packages
 import csv
 from datetime import datetime
+import json
 import time
 from dateutil import parser
 import zmq  # ZMQ sockets
@@ -231,6 +232,15 @@ class SubscriberMW ():
             # and our whereabouts, e.g., name, IP and port
 
             # The following code shows serialization using the protobuf generated code.
+            lock = self.upcall_obj.get_lock()  # get the lock
+            while True:
+                self.logger.info('operation is locked')
+                if not lock:
+                    break
+                time.sleep(10)
+                lock = self.upcall_obj.get_lock()
+
+            self.upcall_obj.set_lock(True)
 
             # Build the Registrant Info message first.
             self.logger.debug(
@@ -335,10 +345,11 @@ class SubscriberMW ():
                 "Stringified serialized buf = %s", buf2send)
 
             # now send this to our discovery service
-            self.logger.debug(
+            self.logger.info(
                 "SubscriberMW::lookup - send stringified buffer to Discovery service")
             # we use the "send" method of ZMQ that sends the bytes
             self.req.send(buf2send)
+            self.logger.info('setting lock')
 
             # now go to our event loop to receive a response to this request
             self.logger.info(

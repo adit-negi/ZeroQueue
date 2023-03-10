@@ -125,7 +125,7 @@ class DiscoveryMW ():
                     
                     connect_str = "tcp://" + ip + ":" + str(port)
                     self.logger.info(connect_str)
-                    curr_req.setsockopt(zmq.RCVTIMEO, 20000)
+                    curr_req.setsockopt(zmq.RCVTIMEO, 320000)
                     curr_req.setsockopt(zmq.LINGER, 0)
                     curr_req.setsockopt(zmq.REQ_RELAXED,1)
                     curr_req.connect(connect_str)
@@ -369,7 +369,7 @@ class DiscoveryMW ():
         # wait for response
         response = None
         try:
-            response = socket.recv(zmq.NOBLOCK)
+            response = socket.recv()
         except:
             self.logger.info('timeout')
             print('didnt get response breaking out')

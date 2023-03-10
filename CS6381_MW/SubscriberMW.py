@@ -234,7 +234,7 @@ class SubscriberMW ():
             # The following code shows serialization using the protobuf generated code.
             lock = self.upcall_obj.get_lock()  # get the lock
             while True:
-
+                self.logger.info('operation is locked')
                 if not lock:
                     break
                 time.sleep(10)

@@ -346,6 +346,7 @@ class SubscriberMW ():
             while True:
                 if not lock:
                     break
+                self.logger.info("waiting for lock to be resolved")
                 time.sleep(10)
                 lock = self.upcall_obj.get_lock()
             

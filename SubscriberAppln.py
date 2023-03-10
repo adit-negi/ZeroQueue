@@ -318,12 +318,7 @@ class SubscriberAppln ():
             # upcall methods.
             self.logger.info(lookup_resp.port)
 
-            json_object = json.dumps({'lock':False}, indent=4)
- 
-            # Writing to sample.json
-            self.logger.info('releasing lock')
-            with open("lockfile.json", "w") as outfile:
-                outfile.write(json_object)
+            
             if not lookup_resp.status:
                 # discovery service is not ready yet
                 self.logger.info(
@@ -335,6 +330,12 @@ class SubscriberAppln ():
                 
 
             else:
+                json_object = json.dumps({'lock':False}, indent=4)
+ 
+                # Writing to sample.json
+                self.logger.info('releasing lock')
+                with open("lockfile.json", "w") as outfile:
+                    outfile.write(json_object)
                 # we got the go ahead
                 # set the state to disseminate
                 self.logger.info("SubscriberAppln::GOT THE LOOKUP RESPONSE LETS CONNECT")

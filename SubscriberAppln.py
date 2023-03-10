@@ -296,8 +296,7 @@ class SubscriberAppln ():
         return self.dissemination == 'Broker'
 
     def broker_data(self):
-        with open('broker.json', 'r') as openfile:
-                
+        with open('broker.json', 'r') as openfile:           
             # Reading from json file
             json_object = json.load(openfile)
         if "broker" in json_object:
@@ -323,7 +322,7 @@ class SubscriberAppln ():
  
             # Writing to sample.json
             self.logger.info('releasing lock')
-            with open("CS6381_MW/lockfile.json", "w") as outfile:
+            with open("lockfile.json", "w") as outfile:
                 outfile.write(json_object)
             if not lookup_resp.status:
                 # discovery service is not ready yet
@@ -356,6 +355,14 @@ class SubscriberAppln ():
         except Exception as e: #pylint: disable=invalid-name
             raise e
 
+    def get_lock(self):
+        return (json.load(open('lockfile.json')))['lock'] 
+
+    def set_lock(self, lock):
+        json_object = json.dumps({'lock':lock}, indent=4)
+        # Writing to sample.json
+        with open("lockfile.json", "w") as outfile:
+            outfile.write(json_object)
     ########################################
     # dump the contents of the object
     ########################################

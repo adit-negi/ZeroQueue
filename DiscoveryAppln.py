@@ -296,6 +296,8 @@ def parse_cmd_line_args():
                         "Discovery ZMQ service runs, default=5555")
     parser.add_argument("-b", "--broker", default="localhost:8087",
                         help="IP Addr:Port combo for the broker service, default localhost:8087")
+    parser.add_argument("-n", "--name", default="discovery1",
+                        help="IP Addr:Port combo for the broker service, default localhost:8087")                        
     return parser.parse_args()
 
 

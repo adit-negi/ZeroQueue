@@ -23,8 +23,8 @@ import time   # for sleep
 import zmq  # ZMQ sockets
 
 # import serialization logic
-from CS6381_MW import discovery_pb2
 
+from CS6381_MW import discovery_pb2, leader_election
 # from CS6381_MW import topic_pb2  # you will need this eventually
 
 # import any other packages you need.
@@ -51,6 +51,7 @@ class DiscoveryMW ():
         self.upcall_obj = None  # handle to appln obj to handle appln-specific data
         self.handle_events = True  # in general we keep going thru the event loop
         self.rep = None
+        self.is_leader = False
 
     ########################################
     # configure/initialize
@@ -65,7 +66,7 @@ class DiscoveryMW ():
             # First retrieve our advertised IP addr and the publication port num
             self.port = args.port
             self.addr = args.addr
-
+            self.name = args.name
             # Next get the ZMQ context
             self.logger.debug("DiscoveryMW::configure - obtain ZMQ context")
             #pylint: disable=abstract-class-instantiated
@@ -105,7 +106,11 @@ class DiscoveryMW ():
 
     def recv_messages(self):
         """Function to receive messages from the pubs/subs/brokers."""
+        zookeeper_obj = leader_election.ApplicationNode(server_name=self.name, 
+                                                        server_data=self.addr+":"+str(self.port),
+                                                         chroot="/application", zookeeper_hosts="localhost:2181")
         while True:
+                
             #  Wait for next request from client
             print('Waiting for request...')
             message = self.rep.recv()

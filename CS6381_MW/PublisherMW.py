@@ -25,6 +25,7 @@
 
 # import the needed packages
 from datetime import datetime
+import json
 import time
 import zmq  # ZMQ sockets
 
@@ -54,7 +55,8 @@ class PublisherMW ():
         self.port = None  # port num where we are going to publish our topics
         self.upcall_obj = None  # handle to appln obj to handle appln-specific data
         self.handle_events = True  # in general we keep going thru the event loop
-
+        self.sub =None
+        self.discovery = None
     ########################################
     # configure/initialize
     ########################################
@@ -96,22 +98,47 @@ class PublisherMW ():
             # Now connect ourselves to the discovery service. Recall that the IP/port were
             # supplied in our argument parsing. Best practices of ZQM suggest that the
             # one who maintains the REQ socket should do the "connect"
-            self.logger.debug(
+            self.logger.info(
                 "PublisherMW::configure - connect to Discovery service")
             # For our assignments we will use TCP. The connect string is made up of
             # tcp:// followed by IP addr:port number.
+            with open('CS6381_MW/leaders.json') as user_file:
+                leader_contents = user_file.read()
+            print(leader_contents)
+            leader_nodes = json.loads(leader_contents)
+            args.discovery = leader_nodes['discovery']
+            self.discovery = args.discovery
             connect_str = "tcp://" + args.discovery
+            self.discovery = args.discovery
+            self.req.setsockopt(zmq.RCVTIMEO, 3000)
+            self.req.setsockopt(zmq.LINGER, 0)
+            self.req.setsockopt(zmq.REQ_RELAXED,1)
             self.req.connect(connect_str)
 
             # Since we are the publisher, the best practice as suggested in ZMQ is for us to
             # "bind" the PUB socket
-            self.logger.debug(
+            self.logger.info(
                 "PublisherMW::configure - bind to the pub socket")
             # note that we publish on any interface hence the * followed by port number.
             # We always use TCP as the transport mechanism (at least for these assignments)
             # Since port is an integer, we convert it to string to make it part of the URL
             bind_string = "tcp://*:" + str(self.port)
             self.pub.bind(bind_string)
+
+            self.sub = context.socket(zmq.SUB)
+
+            with open('CS6381_MW/discovery_pubs.json') as user_file:
+                file_contents = user_file.read()
+
+            discovery_nodes = json.loads(file_contents)
+            
+            for value in discovery_nodes.values():
+                self.logger.info('connecting to other discovery nodes')
+                self.sub.connect(f'tcp://{value}')
+
+            self.sub.setsockopt_string(zmq.SUBSCRIBE,"leader")
+            self.poller.register(self.sub, zmq.POLLIN)
+
 
             self.logger.info("PublisherMW::configure completed")
 
@@ -133,7 +160,7 @@ class PublisherMW ():
                 # poll for events. We give it an infinite timeout.
                 # The return value is a socket to event mask mapping
                 events = dict(self.poller.poll(timeout=timeout))
-
+                print(events)
                 # Unlike the previous starter code, here we are never returning from
                 # the event loop but handle everything in the same locus of control
                 # Notice, also that after handling the event, we retrieve a new value
@@ -141,6 +168,8 @@ class PublisherMW ():
 
                 # check if a timeout has occurred. We know this is the case when
                 # the event mask is empty
+                print("Printing events")
+                print(self.sub in events)
                 if not events:
                     # timeout has occurred so it is time for us to make appln-level
                     # method invocation. Make an upcall to the generic "invoke_operation"
@@ -149,9 +178,22 @@ class PublisherMW ():
                     timeout = self.upcall_obj.invoke_operation()
                 # this is the only socket on which we should be receiving replies
                 elif self.req in events:
-
+                    
                     # handle the incoming reply from remote entity and return the result
                     timeout = self.handle_reply()
+                
+                elif self.sub in events:
+                    print("NEW LEADERRRR")
+                    new_leader = self.sub.recv_string()
+                    new_leader = new_leader[7:]
+                    print(new_leader)
+                    self.req.disconnect("tcp://"+ self.discovery)
+
+                    # Connect to a second remote host at IP address 192.168.0.200 on port 5555
+                    self.req.connect("tcp://"+new_leader)
+                    self.discovery = new_leader
+                    print(self.discovery)
+                    timeout = 0
 
                 else:
                     raise Exception("Unknown event after poll")

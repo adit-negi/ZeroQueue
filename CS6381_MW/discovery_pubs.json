@@ -1,0 +1,5 @@
+{
+    "discovery1":"localhost:4555",
+    "discovery2":"localhost:4556",
+    "discovery3":"localhost:4557"
+}

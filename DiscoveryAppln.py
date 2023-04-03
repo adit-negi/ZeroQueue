@@ -162,12 +162,9 @@ class DiscoveryAppln():
 
             is_ready_resp = discovery_pb2.IsReadyResp() # pylint: disable=no-member
             print("SETTING THE STATUS", self.curr_registered, self.number_of_pubsub)
-            if self.curr_registered >= self.number_of_pubsub:
-                is_ready_resp.status = True
-            else:
-                is_ready_resp.status = False
-            if self.dissemination !="Direct" and self.broker is None:
-                is_ready_resp.status = False
+
+            is_ready_resp.status = True
+           
             disc_resp = discovery_pb2.DiscoveryResp()  # pylint: disable=no-member
             disc_resp.isready_resp.CopyFrom(is_ready_resp)
             disc_resp.msg_type = discovery_pb2.TYPE_ISREADY  # pylint: disable=no-member
@@ -199,6 +196,7 @@ class DiscoveryAppln():
                     ports.append(self.broker.split(":")[1])
             else:
                 print(self.publishers)
+                print(type(self.publishers))
                 for key, val in self.publishers.items():
                     for topic in topics:
                         if topic in val['topics']:
@@ -212,23 +210,32 @@ class DiscoveryAppln():
             pubs_array = list(set(pubs_array))
             print("PRINTING PUBS ARRAY")
             print(self.curr_registered)
-            print(pubs_array)
-            print(addr)
-            print(ports)
             lookup_resp.pubname[:] = pubs_array
 
             lookup_resp.addr[:] = addr
             lookup_resp.port[:] = ports
             print(self.curr_registered)
-            if self.number_of_pubsub > self.curr_registered or not flag:
-                lookup_resp.status = 0
-            else:
-                lookup_resp.status = 1
+   
+            lookup_resp.status = True
             print(lookup_resp.status)
             disc_resp = discovery_pb2.DiscoveryResp()  # pylint: disable=no-member
             disc_resp.lookup_resp.CopyFrom(lookup_resp)
             disc_resp.msg_type = discovery_pb2.TYPE_LOOKUP_PUB_BY_TOPIC  # pylint: disable=no-member
             return disc_resp
+    
+    def get_publishers(self):
+        '''returns the publishers'''
+        return self.publishers
+
+    def update_publisher_data(self, data):
+        '''updates the publishers'''
+        self.publishers = data
+        print(self.publishers)
+
+    def update_broker(self, broker):
+        '''updates the broker'''
+        self.broker = broker
+
 
 def main():
 

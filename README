@@ -105,3 +105,20 @@ CS6381_MW:  (Note this is a folder)
 a. Configure the publisher
 b. Send register requests to the discovery service
 c. After getting successful response send isReady request to the discovery service
+
+## PA3 code flow
+
+1. Warm passive replication to be done.  
+ 1.1 Discovery sends messeges to it's replicas to update state.  [Done]
+ 1.2 Master discovery node will recieve messages for register and lookup. [Done]
+ 1.3 Follower nodes will recieve messages to sync [Done]
+ 1.4 Once zookeeper switches to a different leader the Pub/Sub need to be informed, best way to this???
+ 1.5 Add a REP socket to the poller in Pub, Sub that can handle the requests to change discovery node
+
+2. Leader Election. [Done]
+        2.1 Leader should be elected [Done]
+        2.2 Leader dies new leader should come up [Done]
+3. Publishers and subscribers need to exit gracefully by sending de-register messages.
+4. Subscriber need to be informed about new publishers in the system.
+
+5. Broker replication

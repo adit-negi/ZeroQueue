@@ -282,7 +282,8 @@ def parse_cmd_line_args():
 
     parser.add_argument("-a", "--addr", default="localhost",
                         help="IP addr of this Broker to advertise (default: localhost)")
-
+    parser.add_argument("-n", "--name", default="bro1",
+                        help="name of broker")
     parser.add_argument("-p", "--port", type=int, default=8087,
                         help="Port number on which our underlying" +
                         "Broker ZMQ service runs, default=8087")

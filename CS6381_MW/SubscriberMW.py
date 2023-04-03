@@ -38,8 +38,10 @@
 # import the needed packages
 import csv
 from datetime import datetime
+import json
 from dateutil import parser
 import zmq  # ZMQ sockets
+import configparser  # for configuration parsing
 
 # import serialization logic
 from CS6381_MW import discovery_pb2
@@ -67,6 +69,8 @@ class SubscriberMW ():
         self.port = None  # port num where we are going to publish our topics
         self.upcall_obj = None  # handle to appln obj to handle appln-specific data
         self.handle_events = True  # in general we keep going thru the event loop
+        self.discovery = None
+        self.dissemination =None
 
     ########################################
     # configure/initialize
@@ -90,6 +94,11 @@ class SubscriberMW ():
             # get the ZMQ poller object
             self.logger.debug("SubscriberMW::configure - obtain the poller")
             self.poller = zmq.Poller()
+            self.logger.debug("PublisherAppln::configure - parsing config.ini")
+            config = configparser.ConfigParser()
+            config.read(args.config)
+
+            self.dissemination = config["Dissemination"]["Strategy"]
 
             # Now acquire the REQ and PUB sockets
             # REQ is needed because we are the client of the Discovery service
@@ -105,7 +114,7 @@ class SubscriberMW ():
             self.logger.debug(
                 "SubscriberMW::configure - register the REQ socket for incoming replies")
             self.poller.register(self.req, zmq.POLLIN)
-
+            self.poller.register(self.sub, zmq.POLLIN)
             # Now connect ourselves to the discovery service. Recall that the IP/port were
             # supplied in our argument parsing. Best practices of ZQM suggest that the
             # one who maintains the REQ socket should do the "connect"
@@ -113,9 +122,25 @@ class SubscriberMW ():
                 "SubscriberMW::configure - connect to Discovery service")
             # For our assignments we will use TCP. The connect string is made up of
             # tcp:// followed by IP addr:port number.
+            with open('CS6381_MW/leaders.json') as user_file:
+                leader_contents = user_file.read() 
+            leader_nodes = json.loads(leader_contents)
+            args.discovery = leader_nodes['discovery']
+            self.discovery = args.discovery
             connect_str = "tcp://" + args.discovery
             self.req.connect(connect_str)
 
+            with open('CS6381_MW/discovery_pubs.json') as user_file:
+                file_contents = user_file.read()
+
+            discovery_nodes = json.loads(file_contents)            
+            for value in discovery_nodes.values():
+                self.logger.info('connecting to other discovery nodes')
+                self.sub.connect(f'tcp://{value}')
+
+            self.sub.setsockopt_string(zmq.SUBSCRIBE,"leader")
+            self.sub.setsockopt_string(zmq.SUBSCRIBE,"pub")
+            self.sub.setsockopt_string(zmq.SUBSCRIBE,"broker")
             self.logger.info("SubscriberMW::configure completed")
 
         except Exception as e:  # pylint: disable=invalid-name
@@ -155,6 +180,22 @@ class SubscriberMW ():
 
                     # handle the incoming reply from remote entity and return the result
                     timeout = self.handle_reply()
+
+                elif self.sub in events:
+                    print("NEW LEADERRRR")
+                    
+                    new_leader = self.sub.recv_string()
+                    if new_leader[:3] == "pub":
+                        continue
+                    new_leader = new_leader[7:]
+                    print(new_leader)
+                    self.req.disconnect("tcp://"+ self.discovery)
+
+                    # Connect to a second remote host at IP address 192.168.0.200 on port 5555
+                    self.req.connect("tcp://"+new_leader)
+                    self.discovery = new_leader
+                    print(self.discovery)
+                    timeout = 0
 
                 else:
                     raise Exception("Unknown event after poll")
@@ -346,12 +387,45 @@ class SubscriberMW ():
             self.sub.connect(f'tcp://{address[idx]}:{ports[idx]}')
         for topic in topiclist:
             self.sub.setsockopt_string(zmq.SUBSCRIBE, topic)
+        self.sub.setsockopt_string(zmq.SUBSCRIBE, 'broker')
         print('connected to publisher')
         cnt = 0
         avg_delay =0
         while True:
             data = self.sub.recv().decode("utf-8")
-            print(data)
+            self.logger.info(data)
+            if len(data)>7 and data[:7] == 'leader:':
+                print('leader is ', data[7:])
+                new_leader = data[7:]
+
+                print(new_leader)
+                self.req.disconnect("tcp://"+ self.discovery)
+
+                # Connect to a second remote host at IP address 192.168.0.200 on port 5555
+                self.req.connect("tcp://"+new_leader)
+                self.discovery = new_leader
+                print(self.discovery) 
+                continue
+            if len(data)>4 and data[:4] == 'pub:':
+                print(self.dissemination)
+                if self.dissemination=='Broker':
+                    continue
+                self.logger.info("SubscriberMW::connect to new pub")
+                print('pub is ', data[4:])
+                new_pub = data[4:]
+
+                print(new_pub)
+                self.sub.connect("tcp://"+ new_pub)
+                continue
+                # Connect to a second remote host at IP address
+            if len(data)>7 and data[:7] == 'broker:':
+                self.logger.info("SubscriberMW::connect to new pub")
+                print('broker is ', data[7:])
+                new_pub = data[7:]
+
+                print(new_pub)
+                self.sub.connect("tcp://"+ new_pub)
+                continue
             t1 = data.split('_')[-1]
             t1 = parser.parse(t1)
             t2 = datetime.now()

@@ -234,7 +234,7 @@ class PublisherAppln ():
                 # we have just now sent a isready request, the very next thing we expect is
                 # to receive a response from remote entity. So we need to set the timeout
                 # for the next iteration of the event loop to a large num and so return a None.
-                return None
+                return 10000
 
             elif self.state == self.State.DISSEMINATE:
 

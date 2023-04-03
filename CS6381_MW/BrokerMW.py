@@ -19,11 +19,12 @@
 # behalf of the real Brokers and Brokers. So this will have the logic of
 # both Broker and Broker middleware.
 
+import json
 import time   # for sleep
 import zmq  # ZMQ sockets
 
 # import serialization logic
-from CS6381_MW import discovery_pb2
+from CS6381_MW import discovery_pb2, leader_election
 
 # from CS6381_MW import topic_pb2  # you will need this eventually
 
@@ -53,6 +54,7 @@ class BrokerMW ():
         self.rep = None
         self.sub = None
         self.topiclist = []
+        self.leader = False
 
     ########################################
     # configure/initialize
@@ -67,7 +69,7 @@ class BrokerMW ():
             # First retrieve our advertised IP addr and the publication port num
             self.port = args.port
             self.addr = args.addr
-
+            self.name = args.name
             # Next get the ZMQ context
             self.logger.debug("BrokerMW::configure - obtain ZMQ context")
             #pylint: disable=abstract-class-instantiated
@@ -83,6 +85,14 @@ class BrokerMW ():
             self.logger.debug("BrokerMW::configure - obtain REQ socket")
             self.req = context.socket(zmq.REQ)
             self.sub = context.socket(zmq.SUB)
+            with open('CS6381_MW/discovery_pubs.json') as user_file:
+                file_contents = user_file.read()
+
+            discovery_nodes = json.loads(file_contents)            
+            for value in discovery_nodes.values():
+                self.logger.info('connecting to other discovery nodes')
+                self.sub.connect(f'tcp://{value}')
+            self.sub.setsockopt_string(zmq.SUBSCRIBE, 'pub')
 
             self.logger.debug(
                 "BrokerMW::configure - register the REQ socket for incoming replies")
@@ -110,7 +120,16 @@ class BrokerMW ():
                             "pressure", "temperature", "sound", "altitude",
                             "location"]
 
+            self.logger.info("BrokerMW::configure - leader election")
+            leader_election.ApplicationNode(self, server_name=self.name,
+                                                            server_data=self.addr +
+                                                            ":"+str(self.port),
+                                                            chroot="/broker", zookeeper_hosts="localhost:2181")
             self.logger.info("BrokerMW::configure completed")
+            while not self.leader:
+                # wait for leader election to complete
+                # broker design is stateless so we replicas can just wait
+                time.sleep(1)
 
         except Exception as e_exception:
             raise e_exception
@@ -244,9 +263,17 @@ class BrokerMW ():
             self.sub.connect(f'tcp://{address[idx]}:{ports[idx]}')
         for topic in self.topiclist:
             self.sub.setsockopt_string(zmq.SUBSCRIBE, topic)
+        
         print('connected to Broker')
         while True:
             data_recv = self.sub.recv()
+            self.logger.info("BrokerMW::dissimenate")
+            self.logger.info(data_recv)
+            data = data_recv.decode('ascii')
+            if len(data)>4 and data[:4] == 'pub:':
+                self.logger.info(data[4:])
+                self.sub.connect(f'tcp://{data[4:]}')
+                continue
             self.pub.send(data_recv)
 
 
@@ -334,4 +361,9 @@ class BrokerMW ():
         except Exception as e:  # pylint: disable=invalid-name
             raise e
 
-    
+    def set_leader(self):
+        ''' Set the leader flag '''
+        self.leader = True
+        print('sending new broker')
+        print('broker:'+self.addr+":"+str(self.port))
+        self.pub.send_string("broker:"+self.addr+":"+str(self.port))

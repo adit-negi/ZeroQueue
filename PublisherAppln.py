@@ -135,7 +135,7 @@ class PublisherAppln ():
                 "PublisherAppln::configure - initialize the middleware object")
             self.mw_obj = PublisherMW(self.logger)
             # pass remainder of the args to the m/w object
-            self.mw_obj.configure(args)
+            self.mw_obj.configure(args, self.topiclist)
 
             self.logger.info(
                 "PublisherAppln::configure - configuration complete")
@@ -254,7 +254,6 @@ class PublisherAppln ():
                     # Also, we don't care
                     # about their values. But in future assignments, this can change.
                     for topic in self.topiclist:
-                        print(topic)
                         # For now, we have chosen to send info in the form "topic name: topic value"
                         # In later assignments, we should be using more complex encodings using
                         # protobuf.  In fact, I am going to do this once my basic logic is working.
@@ -428,6 +427,9 @@ def parse_cmd_line_args():
 
     parser.add_argument("-i", "--iters", type=int, default=1000,
                         help="number of publication iterations (default: 1000)")
+
+    parser.add_argument("-hi", "--history", type=int, default=10,
+                        help="number historic publications to be maintained (default: 10)")
 
     parser.add_argument("-l", "--loglevel", type=int, default=logging.INFO, choices=[
                         logging.DEBUG, logging.INFO,

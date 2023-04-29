@@ -30,7 +30,7 @@ import time
 import zmq  # ZMQ sockets
 
 # import serialization logic
-from CS6381_MW import discovery_pb2
+from CS6381_MW import discovery_pb2, leader_election
 # from CS6381_MW import topic_pb2  # you will need this eventually
 
 # import any other packages you need.
@@ -57,10 +57,15 @@ class PublisherMW ():
         self.handle_events = True  # in general we keep going thru the event loop
         self.sub =None
         self.discovery = None
+        self.topiclist = []
+        self.topic_owner = {}
+        self.name = None
+        self.history = 0
+        self.history_data = []
     ########################################
     # configure/initialize
     ########################################
-    def configure(self, args):
+    def configure(self, args, topiclist):
         ''' Initialize the object '''
 
         try:
@@ -70,7 +75,8 @@ class PublisherMW ():
             # First retrieve our advertised IP addr and the publication port num
             self.port = args.port
             self.addr = args.addr
-
+            self.topiclist = topiclist
+            self.history = args.history
             # Next get the ZMQ context
             self.logger.debug("PublisherMW::configure - obtain ZMQ context")
             #pylint: disable=abstract-class-instantiated
@@ -94,7 +100,7 @@ class PublisherMW ():
             self.logger.debug(
                 "PublisherMW::configure - register the REQ socket for incoming replies")
             self.poller.register(self.req, zmq.POLLIN)
-
+            self.name = args.name
             # Now connect ourselves to the discovery service. Recall that the IP/port were
             # supplied in our argument parsing. Best practices of ZQM suggest that the
             # one who maintains the REQ socket should do the "connect"
@@ -131,14 +137,21 @@ class PublisherMW ():
                 file_contents = user_file.read()
 
             discovery_nodes = json.loads(file_contents)
-            
             for value in discovery_nodes.values():
                 self.logger.info('connecting to other discovery nodes')
                 self.sub.connect(f'tcp://{value}')
+            for topic in topiclist:
+                self.topic_owner[topic] = False
 
             self.sub.setsockopt_string(zmq.SUBSCRIBE,"leader")
             self.poller.register(self.sub, zmq.POLLIN)
-
+            for topic in topiclist:
+                leader_election.ApplicationNode(self, server_name=self.name,
+                                                            server_data=self.addr +
+                                                            ":"+str(self.port),
+                                                          chroot="/publisher-"+topic, zookeeper_hosts="localhost:2181")
+            time.sleep(10)
+            print(self.topic_owner)
 
             self.logger.info("PublisherMW::configure completed")
 
@@ -400,9 +413,18 @@ class PublisherMW ():
 
             # Now use the protobuf logic to encode the info and send it.  But for now
             # we are simply sending the string to make sure dissemination is working.
+
+            if not self.topic_owner[topic]:
+                self.logger.info('not the topic owner')
+                return
+            print(self.topic_owner[topic], topic)
             send_str = topic + ":" + data + "_" + str(datetime.now())
             self.logger.debug("PublisherMW::disseminate - %s", send_str)
 
+            self.history_data.append(send_str)
+
+            if len(self.history_data)>self.history:
+                self.history_data.pop(0)
             # send the info as bytes. See how we are providing an encoding of utf-8
             self.pub.send(bytes(send_str, "utf-8"))
 
@@ -428,3 +450,9 @@ class PublisherMW ():
     def disable_event_loop(self):
         ''' disable event loop '''
         self.handle_events = False
+
+    def set_leader(self, chroot):
+        ''' set topic ownership '''
+        topicleader = chroot.split('-')[1]
+        self.logger.info("PublisherMW::set_leader - %s", topicleader)
+        self.topic_owner[topicleader] = True

@@ -62,7 +62,7 @@ class DiscoveryAppln():
         self.dissemination = None
         self.mw_obj = None
         self.curr_registered = 0
-        self.broker = None
+        self.broker = []
     # configure the application
     def configure(self, args):
         """Configure the application."""
@@ -141,7 +141,7 @@ class DiscoveryAppln():
                  "port": msg.register_req.info.port, "topics": msg.register_req.topiclist}
             elif msg.register_req.role == 3:
                 print('recived request to register broker')
-                self.broker = msg.register_req.info.addr + ":" + str(msg.register_req.info.port)
+                self.broker.append(msg.register_req.info.addr + ":" + str(msg.register_req.info.port))
             else:
                 print('recived request to register subscriber')
             return disc_resp
@@ -192,8 +192,9 @@ class DiscoveryAppln():
                     flag = False
                 else:
                     pubs_array.append("broker")
-                    addr.append(self.broker.split(":")[0])
-                    ports.append(self.broker.split(":")[1])
+                    for broker in self.broker:
+                        addr.append(broker.split(":")[0])
+                        ports.append(broker.split(":")[1])
             else:
                 print(self.publishers)
                 print(type(self.publishers))
@@ -234,7 +235,7 @@ class DiscoveryAppln():
 
     def update_broker(self, broker):
         '''updates the broker'''
-        self.broker = broker
+        self.broker.append(broker)
 
 
 def main():

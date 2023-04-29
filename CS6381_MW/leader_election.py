@@ -61,7 +61,10 @@ class ApplicationNode(object):
         self.display_server_information(application_nodes, current_leader)
         if current_leader == self.server_name:
             if self.mw_obj:
-                self.mw_obj.set_leader()
+                if self.patch_chroot.startswith("/publish"):
+                    self.mw_obj.set_leader(self.patch_chroot)
+                else:
+                    self.mw_obj.set_leader()
             print("I AM THE NEW LEADER")
             self.update_shared_data()
 

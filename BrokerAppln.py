@@ -289,6 +289,8 @@ def parse_cmd_line_args():
                         "Broker ZMQ service runs, default=8087")
     parser.add_argument("-d", "--discovery", default="localhost:5555",
                         help="IP Addr:Port combo for the discovery service, default localhost:5555")
+    parser.add_argument("-ld", "--leadernum", default=1,
+                        help="which leader is it for the lb")
     return parser.parse_args()
 
 

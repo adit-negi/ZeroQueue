@@ -186,7 +186,7 @@ class DiscoveryMW ():
                     if register_msg.register_req.role == 1:
                         incoming_request = True
                     if register_msg.register_req.role == 3:
-                        self.logger.info('inform others that broker has changed')
+                        self.logger.info('inform others that new broker has joined')
                         self.pub.send_string("broker:" + register_msg.register_req.info.addr+":" +
                              str(register_msg.register_req.info.port))
                         self.sync_broker_state(register_msg.register_req.info.addr+":" + 

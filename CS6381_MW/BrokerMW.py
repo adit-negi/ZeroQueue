@@ -55,6 +55,7 @@ class BrokerMW ():
         self.sub = None
         self.topiclist = []
         self.leader = False
+        self.leader_num = 0
 
     ########################################
     # configure/initialize
@@ -88,7 +89,7 @@ class BrokerMW ():
             with open('CS6381_MW/discovery_pubs.json') as user_file:
                 file_contents = user_file.read()
 
-            discovery_nodes = json.loads(file_contents)            
+            discovery_nodes = json.loads(file_contents)        
             for value in discovery_nodes.values():
                 self.logger.info('connecting to other discovery nodes')
                 self.sub.connect(f'tcp://{value}')
@@ -111,6 +112,9 @@ class BrokerMW ():
                 "BrokerMW::configure - connect to Broker service")
             # For our assignments we will use TCP. The connect string is made up of
             # tcp:// followed by IP addr:port number.
+            self.leader_num = args.leadernum
+            print("LEADER NUM HERE")
+            print(self.leader_num)
             connect_str = "tcp://" + args.discovery
             self.req.connect(connect_str)
             self.pub = context.socket(zmq.PUB)
@@ -124,7 +128,7 @@ class BrokerMW ():
             leader_election.ApplicationNode(self, server_name=self.name,
                                                             server_data=self.addr +
                                                             ":"+str(self.port),
-                                                            chroot="/broker", zookeeper_hosts="localhost:2181")
+                                                            chroot="/broker"+str(self.leader_num), zookeeper_hosts="localhost:2181")
             self.logger.info("BrokerMW::configure completed")
             while not self.leader:
                 # wait for leader election to complete
@@ -261,9 +265,28 @@ class BrokerMW ():
             # connect to the Broker
             print(f'tcp://{address[idx]}:{ports[idx]}')
             self.sub.connect(f'tcp://{address[idx]}:{ports[idx]}')
-        for topic in self.topiclist:
+        topiclist = ["weather", "humidity", "airquality", "light",
+                            "pressure", "temperature", "sound", "altitude",
+                            "location"]
+
+        #modify the topiclist
+        print(self.leader_num)
+        topics = []
+        if self.leader_num ==1:
+            
+            for i in range(3):
+                topics.append(topiclist[i])
+        elif int(self.leader_num) == 2 :
+            for i in range(3,6):
+                topics.append(topiclist[i])
+
+        elif int(self.leader_num) == 3:
+            for i in range(6,9):
+                topics.append(topiclist[i])
+        for topic in topics:
+            
             self.sub.setsockopt_string(zmq.SUBSCRIBE, topic)
-        
+        print(topics)
         print('connected to Broker')
         while True:
             data_recv = self.sub.recv()

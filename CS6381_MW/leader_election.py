@@ -15,7 +15,7 @@ class ApplicationNode(object):
 
         self.server_name = server_name
         self.server_data = server_data
-
+fasdfads
         self.patch_chroot = chroot
         self.path_nodes = "/nodes"
         self.path_data = "/data"

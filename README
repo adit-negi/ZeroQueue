@@ -1,124 +1,93 @@
-Course: CS6381 Distributed Systems Principles
-Instructor: Aniruddha Gokhale
-Created: Spring 2023
+# ZeroQueue
 
-Purpose:
-------------
+Welcome to the ZeroQueue! This project implements a pub/sub model using ZeroMQ sockets as the underlying communication mechanism. It also incorporates a discovery middleware that efficiently tracks topics, publishers, subscribers' addresses, and IP information. Additionally, a broker service acts as an intermediary for message exchange, enhancing the overall communication flow.
 
-The goal of providing this starter code is to help students get started with the
-programming assignment. By no means is this the best or ideal way of doing
-things nor is it probably the best way to use modern Python capabilities.  I am
-using my traditional C++ OO mindset and constructing the Python code in that
-manner. But, we had to start somewhere and also try to have some uniformity
-among the code structure of the students so that it is easier to build tests
-and other scripts that are reusable and possibly shared across the class.  Hence,
-this attempt.
+## Table of Contents
 
-Directory Structure:
----------------------------
+- [Overview](#overview)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Architecture](#architecture)
+- [Features](#features)
+- [Fault Tolerance](#fault-tolerance)
+- [Contributing](#contributing)
+- [License](#license)
 
-PublisherAppln.py:
-        Provides the starter code for the publisher application-level capabilities.
-        Recall that we are planning to approach the ideal goals of decoupling
-        at time, space and synchronization levels. We achieve this at the
-        application-level but then this breaks at the lower level which is
-        our middleware. Read the description and the purpose inside the
-        PubAppln.py file to see how it is supposed to operate. Make needed
-        modifications.
+## Overview
 
-SubscriberAppln.py:
-        Provides the starter code for the subscriber application-level capabilities.
-        Recall that we are planning to approach the ideal goals of decoupling
-        at time, space and synchronization levels. We achieve this at the
-        application-level but then this breaks at the lower level which is
-        our middleware. Read the description and the purpose inside the
-        SubAppln.py file to see how it is supposed to operate. Make needed
-        modifications.
+Welcome to the ZeroQueue! This project implements a pub/sub model using ZeroMQ sockets as the underlying communication mechanism. It also incorporates a discovery middleware that efficiently tracks topics, publishers, subscribers' addresses, and IP information. Additionally, a broker service acts as an intermediary for message exchange, enhancing the overall communication flow.
 
-DiscoveryAppln.py:
-        Provides the starter code for the centralized Discovery service, which is
-        the focus of Assignment 1. All entities in the system must register with
-        the discovery service letting it know what role do they play, topics
-        of interest, their whereabouts, etc. Few more operations are supported
-        on the Discovery service, such as lookup, ready, etc. All of these will
-        use the ProtoBufs to send/receive serialized information.  For that, we
-        must define the appropriate schema in the *.proto file and run it
-        through the protoc compiler to generate the underlying code needed
-        to serialize/deserialize the data.
+## Installation
 
-BrokerAppln.py:
-        Provides the starter code for the broker application-level capabilities.
-        Recall that one of the dissemination strategies is via the broker. It is
-        only in that case that this broker application will be actively used.
-        When this strategy is active, then all dissemination must happen via
-        the broker. So all publishers send their publications to the broker.
-        In other words, the broker serves as a proxy on behalf of all the
-        subscribers and thus becomes the one single subscriber to every
-        publisher. It wil receive all publications from all publishers. But now,
-        it must determine which publications actually go to which subscribers.
-        The broker becomes a publisher proxy to all subscribers.
+Step-by-step instructions on how to install and set up the project. Include any dependencies and requirements. 
 
-CS6381_MW:  (Note this is a folder)
-        This is the directory under which we will hide all the networking details
-        including the use of ZMQ and its different socket types that are needed
-        for the client-server and pub-sub capabilities. All the decoupling we
-        discussed breaks at this layer but that is alright as somewhere it needs
-        to break anyway. This middleware is further divided into the following files.
-        Please enhance and/or add anything that might be missing.
+```shell
+$ git clone git@github.com:adit-negi/ZeroQueue.git
+$ cd ZeroQueue
+$ pip install -r requirements.txt
+```
 
-        PublisherMW.py:
-                Middleware-level publisher functionality. It will maintain the ZMQ PUB
-                socket needed for publication while use ZMQ REQ socket for talking
-                to the Discovery service.
-                
-        SubscriberMW.py:
-                Middleware-level subscriber functionality. It will maintain the ZMQ SUB
-                socket needed for subscription while use ZMQ REQ socket for talking
-                to the Discovery service.
-                
-        DiscoveryMW.py:
-                Middleware-level centralized lookup functionality. It will maintain the
-                ZMQ REP socket needed for responding to all client requests. Enhance
-                the capabilities as needed.
-                
-        BrokerMW.py:
-                Middleware-level broker functionality. It will maintain both the ZMQ PUB
-                and ZMQ SUB sockets needed for publication/subscription on behalf of the
-                publishers and subscribers, respectively. It will use ZMQ REQ socket for talking
-                to the Discovery service.
+## Usage
+Install mininet to directly run the mininet_test.sh script or you can remove the hostnames from the script and change port numbers to run it on bash shell
+```shell
+$ ./mininet_test.sh
+```
 
-        discovery.proto:
-                Message formats for accessing the services of the Discovery services. Several
-                of these must be modified by the students.
+## Architecture
 
-        discovery_pb2.py:
-                File generated by running the protoc compiler on the discovery.proto file. Here
-                we invoked the following command:
+The technical architecture of the project is designed to provide a robust and scalable pub/sub messaging system using ZeroMQ sockets, a discovery middleware, and ZooKeeper for fault tolerance. The architecture ensures efficient message routing, load balancing, and high availability. 
 
-                           protoc --python_out="./" discovery.proto
+Unstable funcationality for a the discovery nodes to be in Distributed hash table is also supported. Chord algorithm is used to power it.
 
 
-        
-## Flow of the code
+### Components:
+Publishers: Publishers are responsible for sending messages to specific topics. They use ZeroMQ sockets to establish connections with the broker service and publish messages.
 
-1. Publisher - REQ and PUB sockets
-a. Configure the publisher
-b. Send register requests to the discovery service
-c. After getting successful response send isReady request to the discovery service
+1. Subscribers: Subscribers express their interest in receiving messages from specific topics. They also utilize ZeroMQ sockets to connect with the broker service and receive messages.
 
-## PA3 code flow
+2. Discovery Middleware: The discovery middleware acts as a central repository for storing and managing topic information, including publishers' and subscribers' addresses, IP information, and other metadata. It efficiently tracks and updates the information to facilitate seamless communication between publishers and subscribers.
 
-1. Warm passive replication to be done.  
- 1.1 Discovery sends messeges to it's replicas to update state.  [Done]
- 1.2 Master discovery node will recieve messages for register and lookup. [Done]
- 1.3 Follower nodes will recieve messages to sync [Done]
- 1.4 Once zookeeper switches to a different leader the Pub/Sub need to be informed, best way to this???
- 1.5 Add a REP socket to the poller in Pub, Sub that can handle the requests to change discovery node
+3. Broker Service: The broker service serves as an intermediary for message exchange. It receives published messages from publishers, processes them, and forwards them to relevant subscribers based on their subscriptions and topic interests. The broker service ensures reliable delivery and efficient message routing.
 
-2. Leader Election. [Done]
-        2.1 Leader should be elected [Done]
-        2.2 Leader dies new leader should come up [Done]
-3. Publishers and subscribers need to exit gracefully by sending de-register messages.
-4. Subscriber need to be informed about new publishers in the system.
+4. ZooKeeper: ZooKeeper is integrated into the architecture to provide fault tolerance and high availability. It handles node failures, leader election, and maintains consistent states across the system. ZooKeeper ensures that the pub/sub system can gracefully recover from failures without compromising message delivery.
 
-5. Broker replication
+5. Consistent Hashing via Chord: All discovery nodes are in form of a dht ring, to communicate with each other Chord algorithm is leveraged.
+
+### Message Flow:
+1. Publishers publish messages to specific topics through ZeroMQ sockets. They establish connections with the broker service and send messages.
+
+2. The broker service receives the published messages and stores them temporarily. It then uses the discovery middleware to identify interested subscribers based on topic subscriptions.
+
+3. The broker service forwards the messages to the relevant subscribers via ZeroMQ sockets. It ensures that each subscriber receives the message only if it is subscribed to the associated topic.
+
+4. Subscribers receive the messages through ZeroMQ sockets. They process the messages based on their subscribed topics and perform the necessary actions.
+
+### Fault Tolerance:
+To achieve fault tolerance, the project leverages ZooKeeper. ZooKeeper provides the following benefits:
+
+1. Node Failure Handling: ZooKeeper detects node failures and initiates the recovery process. It ensures that the system continues functioning even if some nodes become unavailable.
+
+2. Leader Election: ZooKeeper facilitates leader election to maintain consistency and coordination within the system. It ensures that a single node acts as the leader and handles message distribution and coordination tasks.
+
+3. Consistent States: ZooKeeper maintains consistent states across all nodes, ensuring that the pub/sub system operates reliably and without inconsistencies.
+
+By incorporating ZooKeeper into the architecture, the project achieves high availability, fault tolerance, and the ability to recover gracefully from failures, ensuring uninterrupted message delivery and system operation.
+
+This technical architecture provides a solid foundation for building a scalable, reliable, and fault-tolerant pub/sub messaging system. It enables efficient message routing, load balancing, and seamless communication between publishers and subscribers, enhancing the overall messaging experience.
+
+## Features
+This project offers a range of features to enhance the pub/sub experience:
+
+1. Load Balancing: Distributes message load evenly across multiple subscribers, ensuring optimal resource utilization. 
+
+2. Ownership Strength: Allows publishers to control the strength of their ownership over topics, providing flexibility in message distribution.
+
+3. Dead Letter Queues: Provides a mechanism to handle failed message delivery by storing them in dedicated queues for later processing.
+
+4. Warm Passive Fault Tolerance: Ensures high availability by implementing warm standby nodes that can take over in case of failures.
+5. Quality of Service (QoS): Supports different levels of QoS to prioritize messages based on their criticality and urgency.
+
+6. History: Logs message history to enable auditing, analysis, and replay of past communication.
+
+## Contributing
+No rules -- PRs are welcome
